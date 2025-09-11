@@ -2,11 +2,15 @@
 
 A tiny DataviewJS widget for Obsidian: a habit card with a one‑click button, streak counter, and heatmap (grid/row). On click, it appends a line to the daily note and updates the visualization.
 
+![Demo](assets/canvas-demo.png "How the widget looks in canvas")
+
 ## Requirements
+
 - Obsidian (the script uses `app.vault` and `Notice`).
 - Dataview plugin enabled.
 
 ## Installation
+
 1. Copy `habit-button.js` into your vault. Recommended path: `meta/dv/habit-button.js`.
 2. Insert a DataviewJS code block in the target note and call the view:
 
@@ -23,6 +27,7 @@ await dv.view("meta/dv/habit-button", {
 The path in `dv.view("…")` should point to the file without the `.js` extension, relative to the vault root.
 
 ## What it does
+
 - On click, writes a line to today’s daily file: `- #habit_<key> HH:MM`.
 - By default, daily files are looked up/created in the `daily` folder as `YYYY-MM-DD.md`.
 - The habit key is derived from `title`: lowercased, spaces → `_`, non‑letter/digit/underscore removed, consecutive underscores collapsed.
@@ -30,6 +35,7 @@ The path in `dv.view("…")` should point to the file without the `.js` extensio
 - Visualization: a heatmap by days (`row`) or by weeks (`grid`), with the newest days/weeks on the right.
 
 ## Parameters (input)
+
 - `title` (string, required): habit title.
 - `icon` (string, optional): emoji on the button (defaults to ✅).
 - `warnHoursThreshold` (number, optional): hours without a mark before showing an “overdue” hint. Also affects streak survivability.
@@ -41,6 +47,7 @@ The path in `dv.view("…")` should point to the file without the `.js` extensio
 - Sizing (optional): `cellSize`, `cellGap` (for grid), `dotSize`, `dotGap` (for row).
 
 ## Examples
+
 A card with a row heatmap and a 16h warning threshold:
 
 ```dataviewjs
@@ -75,11 +82,13 @@ await dv.view("meta/dv/habit-button", {
 ```
 
 ## Notes
+
 - If today’s daily file doesn’t exist, it will be created automatically with the heading `# YYYY-MM-DD`.
 - In `grid`, future days are visually hidden (transparent) — the current day remains visible.
 - The “<Nh 🔥” hint appears when roughly less than a day remains before the streak would break.
 - The script is intended to run inside Obsidian (DataviewJS); it won’t run standalone in a browser/Node.
 
 ## Repository structure
+
 - `habit-button.js` — the widget itself.
 - `README.md` — this description and examples.
