@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import type {
   Command,
   MarkdownPostProcessor,
@@ -64,7 +65,7 @@ export class PluginHarness extends HabitButtonPlugin {
   }
 
   get fakeApp(): FakeApp {
-    return super.app as FakeApp;
+    return (this as unknown as { app: FakeApp }).app;
   }
 
   get vault() {
@@ -118,4 +119,16 @@ export async function renderHabitBlock(
   const container = document.createElement("div");
   await processor(source, container, ctx as MarkdownPostProcessorContext);
   return container;
+}
+export function getTodayPath(folder: string): string {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, "0");
+  const dd = String(today.getDate()).padStart(2, "0");
+  const fileName = `${yyyy}-${mm}-${dd}.md`;
+  return folder ? `${folder}/${fileName}` : fileName;
+}
+export async function flushPromises(): Promise<void> {
+  await Promise.resolve();
+  await vi.runAllTimersAsync();
 }
