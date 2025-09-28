@@ -365,19 +365,19 @@ export default class HabitButtonPlugin extends Plugin {
     const stats = await this.collectHabitStats(options);
 
     el.empty();
-    const card = el.createDiv({ cls: "dv-habitv2-card" });
+    const card = el.createDiv({ cls: "dv-habit-card" });
     const iconBtn = card.createEl("button", {
-      cls: "dv-habitv2-iconbtn",
+      cls: "dv-habit-iconbtn",
       text: options.icon || "✅",
       attr: { title: `Отметить: ${options.normalizedTitle}` },
     });
 
-    const right = card.createDiv({ cls: "dv-habitv2-right" });
+    const right = card.createDiv({ cls: "dv-habit-right" });
     const titleRow = right.createDiv();
-    titleRow.createDiv({ cls: "dv-habitv2-title", text: options.normalizedTitle });
+    titleRow.createDiv({ cls: "dv-habit-title", text: options.normalizedTitle });
 
-    const heat = right.createDiv({ cls: "dv-habitv2-heat-row" });
-    const meta = right.createDiv({ cls: "dv-habitv2-meta" });
+    const heat = right.createDiv({ cls: "dv-habit-heat-row" });
+    const meta = right.createDiv({ cls: "dv-habit-meta" });
     const lastEl = meta.createSpan({ cls: "last" });
     meta.createSpan({ cls: "bullet", text: "•" });
     const streakEl = meta.createSpan({ cls: "streak" });
@@ -478,7 +478,7 @@ export default class HabitButtonPlugin extends Plugin {
     heat: HTMLElement;
   }): void {
     const { options, stats, heat } = state;
-    heat.className = "dv-habitv2-heat-row";
+    heat.className = "dv-habit-heat-row";
     heat.empty();
 
     const start = today0();
@@ -491,7 +491,7 @@ export default class HabitButtonPlugin extends Plugin {
       const count = stats.countsByISO.get(iso) ?? 0;
       const level = Math.max(0, Math.min(4, count));
       const dot = heat.createDiv({
-        cls: `dv-habitv2-dot ${level ? `dot-l${Math.min(level, 4)}` : ""}`.trim(),
+        cls: `dv-habit-dot ${level ? `dot-l${Math.min(level, 4)}` : ""}`.trim(),
       });
       dot.title = `${iso}: ${count || 0}`;
     }
@@ -507,7 +507,7 @@ export default class HabitButtonPlugin extends Plugin {
     heat: HTMLElement;
   }): void {
     const { options, stats, heat } = state;
-    heat.className = "dv-habitv2-heat-grid";
+    heat.className = "dv-habit-heat-grid";
     heat.empty();
 
     const today = today0();
@@ -516,7 +516,7 @@ export default class HabitButtonPlugin extends Plugin {
     start.setDate(today.getDate() - isoDow - (options.weeks - 1) * 7);
 
     for (let w = 0; w < options.weeks; w++) {
-      const column = heat.createDiv({ cls: "dv-habitv2-col" });
+      const column = heat.createDiv({ cls: "dv-habit-col" });
       for (let i = 0; i < 7; i++) {
         const current = new Date(start);
         current.setDate(start.getDate() + w * 7 + i);
@@ -528,7 +528,7 @@ export default class HabitButtonPlugin extends Plugin {
         const level = Math.max(0, Math.min(4, count));
         const isFuture = current > today;
         const cell = column.createDiv({
-          cls: `dv-habitv2-cell ${isFuture ? "is-future" : ""} ${
+          cls: `dv-habit-cell ${isFuture ? "is-future" : ""} ${
             level ? `dot-l${Math.min(level, 4)}` : ""
           }`.trim(),
         });

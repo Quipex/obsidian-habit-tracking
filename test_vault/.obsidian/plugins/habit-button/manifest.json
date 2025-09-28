@@ -1,0 +1,10 @@
+{
+  "id": "habit-button",
+  "name": "Habit Button",
+  "version": "0.1.0",
+  "minAppVersion": "1.4.0",
+  "description": "Track habits from daily notes with a heatmap button widget.",
+  "author": "Unknown",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}

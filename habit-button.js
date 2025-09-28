@@ -69,15 +69,15 @@
     const style = document.createElement("style");
     style.id = "dv-habitv25-style";
     style.textContent = `
-    .dv-habitv2-card{
+    .dv-habit-card{
       display:flex; /* gap:14px; */ align-items:flex-start;
       /* padding:14px 16px; border:1px solid var(--background-modifier-border); */
       background: var(--background-primary); border-radius:16px;
       transition: opacity .18s ease, background .18s ease, border-color .18s ease;
     }
-    .dv-habitv2-card.is-done { opacity: .5; }
+    .dv-habit-card.is-done { opacity: .5; }
 
-    .dv-habitv2-iconbtn{
+    .dv-habit-iconbtn{
       width:70px; height:70px; border-radius:12px; font-size:42px; line-height:1;
       display:inline-flex; align-items:center; justify-content:center;
       border:1px solid var(--background-modifier-border);
@@ -85,33 +85,33 @@
       cursor:pointer; user-select:none;
       transition: transform .06s ease, background .18s ease, border-color .18s ease, color .18s ease;
     }
-    .dv-habitv2-iconbtn:active{ transform: scale(.98); }
-    .dv-habitv2-iconbtn.is-done{
+    .dv-habit-iconbtn:active{ transform: scale(.98); }
+    .dv-habit-iconbtn.is-done{
       background:#10b981; border-color:#10b981; color:#052e16;
     }
 
-    .dv-habitv2-right{ display:flex; flex-direction:column; gap:8px; min-width:0; flex:1; margin-left: 16px; }
-    .dv-habitv2-title{ font-weight:600; line-height:1.2; }
+    .dv-habit-right{ display:flex; flex-direction:column; gap:8px; min-width:0; flex:1; margin-left: 16px; }
+    .dv-habit-title{ font-weight:600; line-height:1.2; }
 
-    .dv-habitv2-meta{ display:flex; gap:8px; align-items:center; font-size:0.95em; }
-    .dv-habitv2-meta .last{ color: var(--text-muted); }
-    .dv-habitv2-meta .last.is-overdue{ color:#B45309; font-weight:600; }
-    .dv-habitv2-meta .bullet{ opacity:0.6; }
-    .dv-habitv2-meta .streak{ color:#059669; font-weight:600; }
-    .dv-habitv2-meta .streak.is-zero{ color: var(--text-muted); }
-    .dv-habitv2-meta .streak .time-left{ color:#B45309; font-weight:600; }
+    .dv-habit-meta{ display:flex; gap:8px; align-items:center; font-size:0.95em; }
+    .dv-habit-meta .last{ color: var(--text-muted); }
+    .dv-habit-meta .last.is-overdue{ color:#B45309; font-weight:600; }
+    .dv-habit-meta .bullet{ opacity:0.6; }
+    .dv-habit-meta .streak{ color:#059669; font-weight:600; }
+    .dv-habit-meta .streak.is-zero{ color: var(--text-muted); }
+    .dv-habit-meta .streak .time-left{ color:#B45309; font-weight:600; }
 
     /* ROW layout */
-    .dv-habitv2-heat-row{ display:flex; align-items:center; gap:${dotGap}px; overflow:hidden; }
-    .dv-habitv2-dot{
+    .dv-habit-heat-row{ display:flex; align-items:center; gap:${dotGap}px; overflow:hidden; }
+    .dv-habit-dot{
       width:${dotSize}px; height:${dotSize}px; border-radius:999px;
       background: var(--background-modifier-border); flex:0 0 ${dotSize}px;
     }
 
     /* GRID layout */
-    .dv-habitv2-heat-grid{ display:flex; gap:${cellGap}px; overflow:auto; align-items:flex-start; }
-    .dv-habitv2-col{ display:flex; flex-direction:column; gap:${cellGap}px; }
-    .dv-habitv2-cell{
+    .dv-habit-heat-grid{ display:flex; gap:${cellGap}px; overflow:auto; align-items:flex-start; }
+    .dv-habit-col{ display:flex; flex-direction:column; gap:${cellGap}px; }
+    .dv-habit-cell{
       width:${cellSize}px; height:${cellSize}px; border-radius:2px;
       background: var(--background-modifier-border);
       transition: opacity .12s ease;
@@ -123,39 +123,39 @@
     .dot-l4{ background:#116329; }
 
     /* Ячейки будущих дней в grid — полностью прозрачные */
-    .dv-habitv2-cell.is-future{
+    .dv-habit-cell.is-future{
       opacity: 0 !important;
       background: transparent !important;
       pointer-events: none;
     }
 
     /* anti-list */
-    .dv-habitv2-card, .dv-habitv2-card * { list-style: none !important; }
-    .dv-habitv2-card ul, .dv-habitv2-card ol { margin:0 !important; padding:0 !important; }
-    .dv-habitv2-card li::marker { content:"" !important; }
+    .dv-habit-card, .dv-habit-card * { list-style: none !important; }
+    .dv-habit-card ul, .dv-habit-card ol { margin:0 !important; padding:0 !important; }
+    .dv-habit-card li::marker { content:"" !important; }
     `;
     document.head.appendChild(style);
   }
 
   // ---------- root ----------
-  const card     = EL("div", { cls: "dv-habitv2-card" });
-  const iconBtn  = dv.el("button", icon || "✅", { cls: "dv-habitv2-iconbtn", attr: { title: `Отметить: ${normTitle}` } });
-  const right    = EL("div", { cls: "dv-habitv2-right" });
+  const card     = EL("div", { cls: "dv-habit-card" });
+  const iconBtn  = dv.el("button", icon || "✅", { cls: "dv-habit-iconbtn", attr: { title: `Отметить: ${normTitle}` } });
+  const right    = EL("div", { cls: "dv-habit-right" });
   card.appendChild(iconBtn);
   card.appendChild(right);
 
   // header
   const titleRow = dv.el("div", "");
-  const titleEl  = dv.el("div", normTitle, { cls: "dv-habitv2-title" });
+  const titleEl  = dv.el("div", normTitle, { cls: "dv-habit-title" });
   titleRow.appendChild(titleEl);
   right.appendChild(titleRow);
 
   // heat container
-  const heat = EL("div", { cls: "dv-habitv2-heat-row" });
+  const heat = EL("div", { cls: "dv-habit-heat-row" });
   right.appendChild(heat);
 
   // meta
-  const meta     = EL("div", { cls: "dv-habitv2-meta" });
+  const meta     = EL("div", { cls: "dv-habit-meta" });
   const lastEl   = dv.el("span", "", { cls: "last" });   // только время/прочерк
   const bullet   = dv.el("span", "•", { cls: "bullet" });
   const streakEl = dv.el("span", "", { cls: "streak" });
@@ -228,7 +228,7 @@
 
     // --- render helpers ---
     const renderHeatRow = () => {
-      heat.className = "dv-habitv2-heat-row";
+      heat.className = "dv-habit-heat-row";
       heat.innerHTML = "";
       const t0 = today0();
       const start = new Date(t0);
@@ -239,7 +239,7 @@
         const iso = isoOf(dt.getFullYear(), dt.getMonth() + 1, dt.getDate());
         const count = countsByISO.get(iso) ?? 0;
         const lvl = Math.max(0, Math.min(4, count));
-        const dot = EL("div", { cls: "dv-habitv2-dot " + (lvl ? `dot-l${Math.min(lvl,4)}` : "") });
+        const dot = EL("div", { cls: "dv-habit-dot " + (lvl ? `dot-l${Math.min(lvl,4)}` : "") });
         dot.title = `${iso}: ${count || 0}`;
         heat.appendChild(dot);
       }
@@ -247,7 +247,7 @@
     };
 
     const renderHeatGrid = () => {
-      heat.className = "dv-habitv2-heat-grid";
+      heat.className = "dv-habit-heat-grid";
       heat.innerHTML = "";
 
       const today = today0();
@@ -256,7 +256,7 @@
       start.setDate(today.getDate() - isoDow - (weeks - 1) * 7);
 
       for (let w = 0; w < weeks; w++) {
-        const col = EL("div", { cls: "dv-habitv2-col" });
+        const col = EL("div", { cls: "dv-habit-col" });
         for (let i = 0; i < 7; i++) { // Mon..Sun
           const dt = new Date(start);
           dt.setDate(start.getDate() + w * 7 + i);
@@ -266,7 +266,7 @@
           const lvl = Math.max(0, Math.min(4, count));
 
           const isFuture = dt > today; // СЕГОДНЯ не будущее
-          const cls = "dv-habitv2-cell " + (isFuture ? "is-future " : "") + (lvl ? `dot-l${Math.min(lvl,4)}` : "");
+          const cls = "dv-habit-cell " + (isFuture ? "is-future " : "") + (lvl ? `dot-l${Math.min(lvl,4)}` : "");
           const cell = EL("div", { cls });
           cell.title = `${iso}: ${count || 0}`;
           col.appendChild(cell);

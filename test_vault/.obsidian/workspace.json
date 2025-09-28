@@ -11,17 +11,14 @@
             "id": "d64673ce1ba56cb2",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "Home.canvas",
-                "viewState": {
-                  "x": 0,
-                  "y": 0,
-                  "zoom": 0
-                }
+                "file": "daily/2025-09-29.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-layout-dashboard",
-              "title": "Home"
+              "icon": "lucide-file",
+              "title": "2025-09-29"
             }
           }
         ]
@@ -174,9 +171,10 @@
   },
   "active": "d64673ce1ba56cb2",
   "lastOpenFiles": [
-    "meta/templates/daily note template.md",
     "daily/2025-09-28.md",
+    "daily/2025-09-29.md",
     "Home.canvas",
+    "meta/templates/daily note template.md",
     "test_vault",
     "plugin/main.js",
     "plugin/package-lock.json",
@@ -208,8 +206,6 @@
     "plugin/node_modules/style-mod/README.md",
     "plugin/node_modules/style-mod/src/README.md",
     "plugin/node_modules/@types/estree/README.md",
-    "plugin/node_modules/w3c-keyname/README.md",
-    "plugin/node_modules/undici-types/README.md",
-    "plugin/node_modules/crelt/README.md"
+    "plugin/node_modules/w3c-keyname/README.md"
   ]
 }
