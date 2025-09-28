@@ -11,6 +11,7 @@ import {
   HabitButtonSettingTab,
   HabitButtonSettings,
 } from "./settings";
+import { applyLocale, t } from "./i18n";
 import styles from "../styles.css";
 
 type HeatLayout = "grid" | "row";
@@ -130,15 +131,15 @@ function humanAgoShort(ts: Date | null): string {
   const minutes = mins % 60;
 
   if (days === 0 && hours < 1) {
-    return mins < 2 ? "только что" : `${minutes}м назад`;
+    return mins < 2 ? t("meta.justNow") : t("meta.minutesAgo", minutes);
   }
   if (days === 0) {
-    return `${hours}ч назад`;
+    return t("meta.hoursAgo", hours);
   }
   if (days < 2) {
-    return `${days * 24 + hours}ч. назад`;
+    return t("meta.hoursAgo", days * 24 + hours);
   }
-  return `${days} дн. назад`;
+  return t("meta.daysAgo", days);
 }
 
 function computeStreakByDays(days: Date[], allowedGapMs: number): number {
@@ -175,6 +176,8 @@ export default class HabitButtonPlugin extends Plugin {
   async onload(): Promise<void> {
     await this.loadSettings();
 
+    this.refreshLocale();
+
     this.registerMarkdownCodeBlockProcessor(
       "habit-button",
       (source, el, ctx) => this.renderHabitButton(source, el, ctx),
@@ -182,14 +185,17 @@ export default class HabitButtonPlugin extends Plugin {
 
     this.addCommand({
       id: "habit-button-insert-block",
-      name: "Insert habit button block",
+      name: t("commands.insertBlock"),
       editorCallback: (editor: Editor) => {
         const cursor = editor.getCursor();
-        const snippet =
-          "```habit-button\n" +
-          "title: Моя привычка\n" +
-          "heatLayout: grid\n" +
-          "```\n";
+        const snippet = [
+          "```habit-button",
+          `title: ${t("snippet.title")}`,
+          "heatLayout: grid",
+          t("snippet.heatLayoutComment"),
+          "```",
+          "",
+        ].join("\n");
         editor.replaceRange(snippet, cursor);
       },
     });
@@ -218,6 +224,17 @@ export default class HabitButtonPlugin extends Plugin {
       this.styleEl.parentElement.removeChild(this.styleEl);
     }
     this.styleEl = null;
+  }
+
+  refreshLocale(): void {
+    const preference = this.settings.locale;
+    const candidates: Array<string | undefined> = [
+      preference === "auto" ? undefined : preference,
+      (this.app as any)?.vault?.getConfig?.("locale"),
+      (this.app as any)?.locale,
+      typeof navigator !== "undefined" ? navigator.language : undefined,
+    ];
+    applyLocale(preference, candidates);
   }
 
   private parseBlock(source: string): HabitBlockOptions {
@@ -354,7 +371,7 @@ export default class HabitButtonPlugin extends Plugin {
     const options = this.resolveOptions(blockOptions);
 
     if (!options) {
-      this.renderError(el, "[habit-button] Не задан title");
+      this.renderError(el, t("ui.errorNoTitle"));
       return;
     }
 
@@ -369,7 +386,7 @@ export default class HabitButtonPlugin extends Plugin {
     const iconBtn = card.createEl("button", {
       cls: "dv-habit-iconbtn",
       text: options.icon || "✅",
-      attr: { title: `Отметить: ${options.normalizedTitle}` },
+      attr: { title: t("ui.markHabit", options.normalizedTitle) },
     });
 
     const right = card.createDiv({ cls: "dv-habit-right" });
@@ -414,8 +431,11 @@ export default class HabitButtonPlugin extends Plugin {
         !isStreakAlive;
       lastElement.classList.toggle("is-overdue", shouldWarn);
 
-      const streakPrefix = `Стрик: ${currentStats.streak} дн.`;
-      streakElement.textContent = streakPrefix;
+      const streakText =
+        currentStats.streak > 0
+          ? t("meta.streak", currentStats.streak)
+          : t("meta.streakZero");
+      streakElement.textContent = streakText;
       streakElement.classList.toggle("is-zero", currentStats.streak === 0);
 
       const remH = Number.isFinite(hoursSinceLast)
@@ -424,7 +444,7 @@ export default class HabitButtonPlugin extends Plugin {
       if (currentStats.streak > 0 && remH > 0 && remH <= 24) {
         const hint = streakElement.createSpan({ cls: "time-left" });
         const hrs = Math.ceil(remH);
-        hint.textContent = ` <${hrs}ч. 🔥`;
+        hint.textContent = ` ${t("overdue.label", hrs)}`;
       }
     };
 
@@ -467,7 +487,7 @@ export default class HabitButtonPlugin extends Plugin {
         refresh();
       } catch (error) {
         console.error("[habit-button] append error", error);
-        new Notice("Ошибка при записи привычки", 4000);
+        new Notice(t("ui.noticeError"), 4000);
       }
     });
   }
@@ -576,7 +596,7 @@ export default class HabitButtonPlugin extends Plugin {
       await this.app.vault.append(file, habitLine);
     }
 
-    new Notice(`Добавлено: ${options.normalizedTitle}`);
+    new Notice(t("ui.noticeAdded", options.normalizedTitle));
     return now;
   }
 

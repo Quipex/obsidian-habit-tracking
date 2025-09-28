@@ -1,5 +1,7 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import HabitButtonPlugin from "./main";
+import { t } from "./i18n";
+import type { LocalePreference } from "./i18n";
 
 export interface HabitButtonSettings {
   dailyFolder: string;
@@ -7,6 +9,7 @@ export interface HabitButtonSettings {
   weeks: number;
   days: number;
   templatePath: string;
+  locale: LocalePreference;
 }
 
 export const DEFAULT_SETTINGS: HabitButtonSettings = {
@@ -15,6 +18,7 @@ export const DEFAULT_SETTINGS: HabitButtonSettings = {
   weeks: 26,
   days: 240,
   templatePath: "meta/templates/daily note template.md",
+  locale: "auto",
 };
 
 export class HabitButtonSettingTab extends PluginSettingTab {
@@ -28,11 +32,32 @@ export class HabitButtonSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "Habit Button" });
+    containerEl.createEl("h2", { text: t("settings.heading") });
 
     new Setting(containerEl)
-      .setName("Daily folder")
-      .setDesc("Folder that contains daily notes to scan for habits.")
+      .setName(t("settings.language.label"))
+      .setDesc(t("settings.language.desc"))
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions({
+            auto: t("settings.language.options.auto"),
+            en: t("settings.language.options.en"),
+            ru: t("settings.language.options.ru"),
+          })
+          .setValue(this.plugin.settings.locale)
+          .onChange(async (value) => {
+            if (value === "auto" || value === "en" || value === "ru") {
+              this.plugin.settings.locale = value;
+              await this.plugin.saveSettings();
+              this.plugin.refreshLocale();
+              this.display();
+            }
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName(t("settings.dailyFolder.label"))
+      .setDesc(t("settings.dailyFolder.desc"))
       .addText((text) =>
         text
           .setPlaceholder("daily")
@@ -44,8 +69,8 @@ export class HabitButtonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Daily note template")
-      .setDesc("Optional template used when creating a missing daily note.")
+      .setName(t("settings.templatePath.label"))
+      .setDesc(t("settings.templatePath.desc"))
       .addText((text) =>
         text
           .setPlaceholder("meta/templates/daily note template.md")
@@ -57,11 +82,11 @@ export class HabitButtonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Default layout")
-      .setDesc("Heatmap layout to use when none is specified in the block.")
+      .setName(t("settings.defaultLayout.label"))
+      .setDesc(t("settings.defaultLayout.desc"))
       .addDropdown((dropdown) =>
         dropdown
-          .addOptions({ grid: "Grid", row: "Row" })
+          .addOptions({ grid: t("settings.defaultLayout.options.grid"), row: t("settings.defaultLayout.options.row") })
           .setValue(this.plugin.settings.defaultLayout)
           .onChange(async (value) => {
             if (value === "grid" || value === "row") {
@@ -72,8 +97,8 @@ export class HabitButtonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Grid weeks")
-      .setDesc("Number of weeks to show in grid heatmap layout.")
+      .setName(t("settings.gridWeeks.label"))
+      .setDesc(t("settings.gridWeeks.desc"))
       .addSlider((slider) =>
         slider
           .setLimits(4, 52, 1)
@@ -86,8 +111,8 @@ export class HabitButtonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName("Row days")
-      .setDesc("Number of days to show in row heatmap layout.")
+      .setName(t("settings.rowDays.label"))
+      .setDesc(t("settings.rowDays.desc"))
       .addSlider((slider) =>
         slider
           .setLimits(30, 365, 5)

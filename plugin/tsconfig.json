@@ -13,6 +13,7 @@
       "@src/*": ["src/*"]
     },
     "types": ["node", "obsidian"],
+    "resolveJsonModule": true,
     "outDir": "./dist"
   },
   "include": ["src/**/*"],

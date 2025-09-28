@@ -12,5 +12,8 @@
     "esbuild": "^0.19.12",
     "obsidian": "latest",
     "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "tiny-i18n": "^2.0.4"
   }
 }

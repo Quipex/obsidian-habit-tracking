@@ -17,6 +17,7 @@ const context = await esbuild.context({
   banner,
   loader: {
     ".css": "text",
+    ".json": "json",
   },
   supported: {
     "top-level-await": false,
