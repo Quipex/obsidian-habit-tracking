@@ -5,27 +5,36 @@ import ru from "./locales/ru.json";
 const { createIsolateI18n } = tinyI18n;
 const instance = createIsolateI18n();
 
-const dictionaries = {
-  en: en as Record<string, string>,
-  ru: ru as Record<string, string>,
-};
+const LOCALE_TABLE = [
+  ["en", en],
+  ["ru", ru],
+] as const;
 
-type SupportedLocale = keyof typeof dictionaries;
+type SupportedLocale = (typeof LOCALE_TABLE)[number][0];
+
+type LocaleDictionary = Record<string, string>;
+
+const dictionaries: Record<SupportedLocale, LocaleDictionary> = Object.fromEntries(
+  LOCALE_TABLE.map(([code, dict]) => [code, dict as LocaleDictionary]),
+) as Record<SupportedLocale, LocaleDictionary>;
+
+const supportedLocales: SupportedLocale[] = LOCALE_TABLE.map(([code]) => code);
 
 const FALLBACK_LOCALE: SupportedLocale = "en";
 
-Object.entries(dictionaries).forEach(([locale, dict]) => {
-  instance.setDictionary(dict as Record<string, string>, locale);
-});
+for (const [code, dict] of LOCALE_TABLE) {
+  instance.setDictionary(dict as LocaleDictionary, code);
+}
 
 let currentLocale: SupportedLocale = FALLBACK_LOCALE;
 instance.setLanguage(FALLBACK_LOCALE);
 
-function normalizeLocale(locale: string | undefined | null): SupportedLocale | null {
+function matchLocale(locale: string | undefined | null): SupportedLocale | null {
   if (!locale) return null;
-  const normalized = locale.toLowerCase();
-  if (normalized.startsWith("ru")) return "ru";
-  if (normalized.startsWith("en")) return "en";
+  const lower = locale.toLowerCase();
+  for (const code of supportedLocales) {
+    if (lower === code || lower.startsWith(`${code}-`)) return code;
+  }
   return null;
 }
 
@@ -41,11 +50,11 @@ export function resolveLocale(
   candidates: Array<string | undefined | null>,
 ): SupportedLocale {
   if (preference !== "auto") {
-    return normalizeLocale(preference) ?? FALLBACK_LOCALE;
+    return matchLocale(preference) ?? FALLBACK_LOCALE;
   }
 
   for (const candidate of candidates) {
-    const normalized = normalizeLocale(candidate);
+    const normalized = matchLocale(candidate);
     if (normalized) return normalized;
   }
 
@@ -70,4 +79,5 @@ export function t(key: string, ...args: Array<string | number>): string {
   return translated ?? key;
 }
 
-export const availableLocales: SupportedLocale[] = ["en", "ru"];
+export const availableLocales: SupportedLocale[] = [...supportedLocales];
+

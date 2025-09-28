@@ -2725,24 +2725,28 @@ var ru_default = {
 // src/i18n.ts
 var { createIsolateI18n } = import_tiny_i18n.default;
 var instance = createIsolateI18n();
-var dictionaries = {
-  en: en_default,
-  ru: ru_default
-};
+var LOCALE_TABLE = [
+  ["en", en_default],
+  ["ru", ru_default]
+];
+var dictionaries = Object.fromEntries(
+  LOCALE_TABLE.map(([code, dict]) => [code, dict])
+);
+var supportedLocales = LOCALE_TABLE.map(([code]) => code);
 var FALLBACK_LOCALE = "en";
-Object.entries(dictionaries).forEach(([locale, dict]) => {
-  instance.setDictionary(dict, locale);
-});
+for (const [code, dict] of LOCALE_TABLE) {
+  instance.setDictionary(dict, code);
+}
 var currentLocale = FALLBACK_LOCALE;
 instance.setLanguage(FALLBACK_LOCALE);
-function normalizeLocale(locale) {
+function matchLocale(locale) {
   if (!locale)
     return null;
-  const normalized = locale.toLowerCase();
-  if (normalized.startsWith("ru"))
-    return "ru";
-  if (normalized.startsWith("en"))
-    return "en";
+  const lower = locale.toLowerCase();
+  for (const code of supportedLocales) {
+    if (lower === code || lower.startsWith(`${code}-`))
+      return code;
+  }
   return null;
 }
 function setResolvedLocale(locale) {
@@ -2751,10 +2755,10 @@ function setResolvedLocale(locale) {
 }
 function resolveLocale(preference, candidates) {
   if (preference !== "auto") {
-    return normalizeLocale(preference) ?? FALLBACK_LOCALE;
+    return matchLocale(preference) ?? FALLBACK_LOCALE;
   }
   for (const candidate of candidates) {
-    const normalized = normalizeLocale(candidate);
+    const normalized = matchLocale(candidate);
     if (normalized)
       return normalized;
   }
@@ -2769,6 +2773,7 @@ function t(key, ...args) {
   const translated = instance.i18n(key, ...args.map(String));
   return translated ?? key;
 }
+var availableLocales = [...supportedLocales];
 
 // src/settings.ts
 var DEFAULT_SETTINGS = {
