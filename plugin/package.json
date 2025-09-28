@@ -1,0 +1,16 @@
+{
+  "name": "habit-button",
+  "version": "0.1.0",
+  "description": "Habit Button Obsidian plugin",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs --watch",
+    "build": "node esbuild.config.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "esbuild": "^0.19.12",
+    "obsidian": "latest",
+    "typescript": "^5.4.5"
+  }
+}
