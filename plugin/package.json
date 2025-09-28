@@ -6,13 +6,17 @@
   "scripts": {
     "dev": "node esbuild.config.mjs --watch",
     "build": "node esbuild.config.mjs",
-    "deploy:test": "npm run build && node scripts/sync-test-vault.mjs"
+    "deploy:test": "npm run build && node scripts/sync-test-vault.mjs",
+    "test:functional": "vitest run"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
     "esbuild": "^0.19.12",
+    "jsdom": "^27.0.0",
     "obsidian": "latest",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^3.2.4",
+    "yaml": "^2.8.1"
   },
   "dependencies": {
     "tiny-i18n": "^2.0.4"
