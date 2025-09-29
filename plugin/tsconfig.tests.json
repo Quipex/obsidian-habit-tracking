@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/**/*",
+    "tests/**/*"
+  ],
+  "compilerOptions": {
+    "types": [
+      "node",
+      "obsidian",
+      "vitest"
+    ],
+    "noEmit": true,
+    "moduleResolution": "bundler",
+    "paths": {
+      "obsidian": [
+        "tests/stubs/obsidian.ts"
+      ],
+      "@src/*": [
+        "src/*"
+      ]
+    }
+  }
+}

@@ -14,6 +14,8 @@
     },
     "types": ["node", "obsidian"],
     "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "outDir": "./dist"
   },
   "include": ["src/**/*"],

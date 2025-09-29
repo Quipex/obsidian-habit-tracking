@@ -45,7 +45,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
             ru: t("settings.language.options.ru"),
           })
           .setValue(this.plugin.settings.locale)
-          .onChange(async (value) => {
+          .onChange(async (value: LocalePreference) => {
             if (value === "auto" || value === "en" || value === "ru") {
               this.plugin.settings.locale = value;
               await this.plugin.saveSettings();
@@ -62,7 +62,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         text
           .setPlaceholder("daily")
           .setValue(this.plugin.settings.dailyFolder)
-          .onChange(async (value) => {
+          .onChange(async (value: string) => {
             this.plugin.settings.dailyFolder = value.trim() || "daily";
             await this.plugin.saveSettings();
           }),
@@ -75,7 +75,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         text
           .setPlaceholder("meta/templates/daily note template.md")
           .setValue(this.plugin.settings.templatePath)
-          .onChange(async (value) => {
+          .onChange(async (value: string) => {
             this.plugin.settings.templatePath = value.trim();
             await this.plugin.saveSettings();
           }),
@@ -88,7 +88,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         dropdown
           .addOptions({ grid: t("settings.defaultLayout.options.grid"), row: t("settings.defaultLayout.options.row") })
           .setValue(this.plugin.settings.defaultLayout)
-          .onChange(async (value) => {
+          .onChange(async (value: "grid" | "row") => {
             if (value === "grid" || value === "row") {
               this.plugin.settings.defaultLayout = value;
               await this.plugin.saveSettings();
@@ -104,7 +104,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
           .setLimits(4, 52, 1)
           .setValue(this.plugin.settings.weeks)
           .setDynamicTooltip()
-          .onChange(async (value) => {
+          .onChange(async (value: number) => {
             this.plugin.settings.weeks = value;
             await this.plugin.saveSettings();
           }),
@@ -118,7 +118,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
           .setLimits(30, 365, 5)
           .setValue(this.plugin.settings.days)
           .setDynamicTooltip()
-          .onChange(async (value) => {
+          .onChange(async (value: number) => {
             this.plugin.settings.days = value;
             await this.plugin.saveSettings();
           }),

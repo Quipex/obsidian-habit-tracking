@@ -53,9 +53,11 @@ const manifest: PluginManifest = {
   isDesktopOnly: false,
 };
 
+type CodeBlockHandler = (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => void | Promise<any>;
+
 export class PluginHarness extends HabitButtonPlugin {
   public commands: Command[] = [];
-  public processors: Array<{ language: string; processor: MarkdownPostProcessor }> = [];
+  public processors: Array<{ language: string; processor: CodeBlockHandler }> = [];
   public settingTabs: any[] = [];
   public cleanups: Array<() => void> = [];
   public savedSettings?: HabitButtonSettings;
@@ -81,8 +83,12 @@ export class PluginHarness extends HabitButtonPlugin {
     this.settingTabs.push(tab);
   }
 
-  override registerMarkdownCodeBlockProcessor(language: string, processor: MarkdownPostProcessor) {
+  override registerMarkdownCodeBlockProcessor(language: string, processor: CodeBlockHandler, sortOrder?: number) {
     this.processors.push({ language, processor });
+    return Object.assign(
+      ((el: HTMLElement, ctx: MarkdownPostProcessorContext) => processor("", el, ctx)) as unknown as MarkdownPostProcessor,
+      { sortOrder },
+    );
   }
 
   override register(onunload: () => void): void {
@@ -104,7 +110,7 @@ export async function bootstrapPlugin(): Promise<PluginHarness> {
   return plugin;
 }
 
-export function getCodeBlockProcessor(plugin: PluginHarness, language = "habit-button") {
+export function getCodeBlockProcessor(plugin: PluginHarness, language = "habit-button"): CodeBlockHandler {
   const entry = plugin.processors.find((processor) => processor.language === language);
   if (!entry) throw new Error(`Processor for ${language} not registered`);
   return entry.processor;

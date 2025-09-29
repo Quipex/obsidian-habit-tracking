@@ -294,8 +294,8 @@ export default class HabitButtonPlugin extends Plugin {
     const folder = trimSlashes(options.dailyFolder);
     const folderPrefix = folder ? `${folder}/` : "";
 
-    const files = this.app.vault
-      .getMarkdownFiles()
+    const files = (this.app.vault
+      .getMarkdownFiles() as TFile[])
       .filter((file) => (folder ? file.path.startsWith(folderPrefix) : true));
 
     const habitRegex = new RegExp(`${escapeRegExp("#habit_")}([^\\s#]+)(?:\\s+(\\d{1,2}:\\d{2}))?`, "gim");

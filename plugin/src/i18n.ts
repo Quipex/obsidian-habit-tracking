@@ -1,8 +1,7 @@
-import tinyI18n from "tiny-i18n";
+import tinyI18n, { createIsolateI18n } from "./i18n-wrapper";
 import en from "./locales/en.json";
 import ru from "./locales/ru.json";
 
-const { createIsolateI18n } = tinyI18n;
 const instance = createIsolateI18n();
 
 const LOCALE_TABLE = [

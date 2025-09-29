@@ -2627,8 +2627,8 @@ var require_index_es5 = __commonJS({
       };
     }
     var tinyI18nInstance = createIsolateI18n2();
-    var tinyI18n2 = Object.assign({ createIsolateI18n: createIsolateI18n2 }, tinyI18nInstance);
-    exports2.default = tinyI18n2;
+    var tinyI18n3 = Object.assign({ createIsolateI18n: createIsolateI18n2 }, tinyI18nInstance);
+    exports2.default = tinyI18n3;
   }
 });
 
@@ -2643,8 +2643,9 @@ var import_obsidian2 = require("obsidian");
 // src/settings.ts
 var import_obsidian = require("obsidian");
 
-// src/i18n.ts
+// src/i18n-wrapper.ts
 var import_tiny_i18n = __toESM(require_index_es5());
+var { createIsolateI18n } = import_tiny_i18n.default;
 
 // src/locales/en.json
 var en_default = {
@@ -2723,7 +2724,6 @@ var ru_default = {
 };
 
 // src/i18n.ts
-var { createIsolateI18n } = import_tiny_i18n.default;
 var instance = createIsolateI18n();
 var LOCALE_TABLE = [
   ["en", en_default],
