@@ -1,14 +1,9 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 import { bootstrapPlugin, getTodayPath, renderHabitBlock, flushPromises } from "./harness";
+import { formatTime } from "./utils/time";
 
 const FIXED_DATE = new Date("2024-06-15T08:30:00Z");
 const EXPECTED_TIME = formatTime(new Date(FIXED_DATE));
-
-function formatTime(date: Date): string {
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes}`;
-}
 
 describe("Habit logging", () => {
   beforeEach(() => {
