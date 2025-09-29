@@ -80,7 +80,7 @@ describe("Habit meta warnings", () => {
       expect(streak.querySelector(".time-left")).toBeNull();
     });
 
-    it("resets streak and clears warning when streak is broken", async () => {
+    it("keeps warning active when streak is broken", async () => {
       // given
       const plugin = await bootstrapPlugin();
       seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 72 }], NOW);
@@ -94,7 +94,7 @@ describe("Habit meta warnings", () => {
       expectStreakText(streak, "Streak: 0 days");
       expect(streak.classList.contains("is-zero")).toBe(true);
       expect(streak.querySelector(".time-left")).toBeNull();
-      expect(last.classList.contains("is-overdue")).toBe(false);
+      expect(last.classList.contains("is-overdue")).toBe(true);
     });
 
     it("marks today as done only when a mark exists for today", async () => {
@@ -148,7 +148,7 @@ describe("Habit meta warnings", () => {
       expect(streak.querySelector(".time-left")).toBeNull();
     });
 
-    it("drops streak once the default window is exceeded", async () => {
+    it("drops streak once the default window is exceeded but keeps warning", async () => {
       // given
       const plugin = await bootstrapPlugin();
       seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 60 }], NOW);
@@ -161,7 +161,7 @@ describe("Habit meta warnings", () => {
       // then
       expectStreakText(streak, "Streak: 0 days");
       expect(streak.classList.contains("is-zero")).toBe(true);
-      expect(last.classList.contains("is-overdue")).toBe(false);
+      expect(last.classList.contains("is-overdue")).toBe(true);
       expect(streak.querySelector(".time-left")).toBeNull();
     });
   });

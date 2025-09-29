@@ -3148,12 +3148,15 @@ var HabitButtonPlugin = class extends import_obsidian2.Plugin {
       lastElement.textContent = humanAgoShort(currentStats.lastTs);
       const hoursSinceLast = currentStats.lastTs ? (Date.now() - currentStats.lastTs.getTime()) / 36e5 : Infinity;
       const isStreakAlive = currentStats.streak > 0;
-      const shouldWarn = typeof options.warnHoursThreshold === "number" && Number.isFinite(options.warnHoursThreshold) && hoursSinceLast >= options.warnHoursThreshold && !isStreakAlive;
+      const hasLastMark = currentStats.lastTs !== null;
+      const remainingHours = Number.isFinite(hoursSinceLast) ? currentStats.allowedGapH - hoursSinceLast : Infinity;
+      const isStreakBroken = hasLastMark && !isStreakAlive;
+      const shouldWarn = isStreakAlive && remainingHours > 0 && remainingHours <= 24 || isStreakBroken && Number.isFinite(hoursSinceLast);
       lastElement.classList.toggle("is-overdue", shouldWarn);
       const streakText = currentStats.streak > 0 ? t("meta.streak", currentStats.streak) : t("meta.streakZero");
       streakElement.textContent = streakText;
       streakElement.classList.toggle("is-zero", currentStats.streak === 0);
-      const remH = Number.isFinite(hoursSinceLast) ? currentStats.allowedGapH - hoursSinceLast : -Infinity;
+      const remH = remainingHours;
       if (currentStats.streak > 0 && remH > 0 && remH <= 24) {
         const hint = streakElement.createSpan({ cls: "time-left" });
         const hrs = Math.ceil(remH);
