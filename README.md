@@ -17,7 +17,7 @@ A tiny DataviewJS widget for Obsidian: a habit card with a one‑click button, s
 ```dataviewjs
 await dv.view("meta/dv/habit-button", {
   title: "Creatine",
-  warnHoursThreshold: 16,
+  gracePeriodHours: 16,
   icon: "💪",
   heatLayout: "row",   // "grid" or "row"
   days: 26              // for row; for grid use weeks
@@ -31,14 +31,14 @@ The path in `dv.view("…")` should point to the file without the `.js` extensio
 - On click, writes a line to today’s daily file: `- #habit_<key> HH:MM`.
 - By default, daily files are looked up/created in the `daily` folder as `YYYY-MM-DD.md`.
 - The habit key is derived from `title`: lowercased, spaces → `_`, non‑letter/digit/underscore removed, consecutive underscores collapsed.
-- The streak is calculated by unique days with an allowed gap of `24h + warnHoursThreshold` (or 48h if the threshold is not set).
+- The streak is calculated by unique days with an allowed gap of `gracePeriodHours + warningWindowHours` (defaults to `24h + 24h`).
 - Visualization: a heatmap by days (`row`) or by weeks (`grid`), with the newest days/weeks on the right.
 
 ## Parameters (input)
 
 - `title` (string, required): habit title.
 - `icon` (string, optional): emoji on the button (defaults to ✅).
-- `warnHoursThreshold` (number, optional): hours without a mark before showing an “overdue” hint. Also affects streak survivability.
+- `gracePeriodHours` (number, optional): hours without a mark before the streak breaks. Added to `warningWindowHours` to determine the warning window.
 - `dailyFolder` (string, optional): folder for daily notes. Defaults to `"daily"`.
 - Heatmap:
   - `heatLayout`: `"grid"` or `"row"` (defaults to `"grid"`).
@@ -53,7 +53,7 @@ A card with a row heatmap and a 16h warning threshold:
 ```dataviewjs
 await dv.view("meta/dv/habit-button", {
   title: "Creatine",
-  warnHoursThreshold: 16,
+  gracePeriodHours: 16,
   icon: "💪",
   heatLayout: "row",
   days: 26
@@ -65,7 +65,7 @@ A weekly grid without extra parameters (26 weeks by default):
 ```dataviewjs
 await dv.view("meta/dv/habit-button", {
   title: "Walk the dog 🐶",
-  warnHoursThreshold: 16,
+  gracePeriodHours: 16,
   icon: "🦮",
   heatLayout: "grid"
 });
@@ -76,7 +76,7 @@ A rarer habit with a larger threshold:
 ```dataviewjs
 await dv.view("meta/dv/habit-button", {
   title: "Call mom",
-  warnHoursThreshold: 24 * 6,
+  gracePeriodHours: 24 * 6,
   icon: "☎️"
 });
 ```

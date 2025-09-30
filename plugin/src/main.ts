@@ -18,7 +18,7 @@ type HeatLayout = "grid" | "row";
 
 interface HabitBlockOptions {
   title?: string;
-  warnHoursThreshold?: number;
+  gracePeriodHours?: number;
   icon?: string;
   dailyFolder?: string;
   heatLayout?: HeatLayout;
@@ -34,7 +34,7 @@ interface HabitBlockOptions {
 interface ResolvedHabitOptions {
   title: string;
   normalizedTitle: string;
-  warnHoursThreshold?: number;
+  gracePeriodHours?: number;
   icon?: string;
   dailyFolder: string;
   heatLayout: HeatLayout;
@@ -302,7 +302,7 @@ export default class HabitButtonPlugin extends Plugin {
       title,
       normalizedTitle,
       icon: raw.icon,
-      warnHoursThreshold: typeof raw.warnHoursThreshold === "number" ? raw.warnHoursThreshold : undefined,
+      gracePeriodHours: typeof raw.gracePeriodHours === "number" ? raw.gracePeriodHours : undefined,
       dailyFolder,
       heatLayout: layout,
       weeks,
@@ -362,9 +362,9 @@ export default class HabitButtonPlugin extends Plugin {
       }
     }
 
-    const baseThreshold = Number.isFinite(options.warnHoursThreshold)
-      ? Math.max(1, Number(options.warnHoursThreshold))
-      : clampPositive(this.settings.defaultWarnHoursThreshold, DEFAULT_SETTINGS.defaultWarnHoursThreshold);
+    const baseThreshold = Number.isFinite(options.gracePeriodHours)
+      ? Math.max(1, Number(options.gracePeriodHours))
+      : clampPositive(this.settings.defaultGracePeriodHours, DEFAULT_SETTINGS.defaultGracePeriodHours);
     const warningWindow = clampPositive(this.settings.warningWindowHours, DEFAULT_SETTINGS.warningWindowHours, 0);
     const allowedGapH = baseThreshold + warningWindow;
     const allowedGapMs = allowedGapH * 3600000;

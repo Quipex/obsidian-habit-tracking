@@ -1,6 +1,6 @@
 {
 	"nodes":[
-		{"id":"effea5282926a539","type":"text","text":"```habit-button\ntitle: утренняя зарядка\nicon: 🧘\nwarnHoursThreshold: 16\ncellSize: 15\n```","x":-2420,"y":-1440,"width":600,"height":220},
+		{"id":"effea5282926a539","type":"text","text":"```habit-button\ntitle: утренняя зарядка\nicon: 🧘\ngracePeriodHours: 16\ncellSize: 15\n```","x":-2420,"y":-1440,"width":600,"height":220},
 		{"id":"74e910982b146fdd","type":"text","text":"```habit-button\ntitle: утренняя зарядка 1\nicon: 🧘\n```","x":-2420,"y":-1180,"width":600,"height":220}
 	],
 	"edges":[]

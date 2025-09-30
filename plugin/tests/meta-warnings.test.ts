@@ -41,12 +41,12 @@ describe("Habit meta warnings", () => {
     expect(button.classList.contains("is-done")).toBe(false);
   });
 
-  describe("warnHoursThreshold specified", () => {
+describe("gracePeriodHours specified", () => {
     it("activates warning when less than a day remains", async () => {
       // given
       const plugin = await bootstrapPlugin();
       seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 30 }], NOW);
-      const habitDefinition = buildHabitDefinition({ title: HABIT_TITLE, warnHoursThreshold: 12 });
+      const habitDefinition = buildHabitDefinition({ title: HABIT_TITLE, gracePeriodHours: 12 });
 
       // when
       const container = await renderHabit(plugin, habitDefinition);
@@ -68,7 +68,7 @@ describe("Habit meta warnings", () => {
       // given
       const plugin = await bootstrapPlugin();
       seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 10 }], NOW);
-      const habitDefinition = buildHabitDefinition({ title: HABIT_TITLE, warnHoursThreshold: 12 });
+      const habitDefinition = buildHabitDefinition({ title: HABIT_TITLE, gracePeriodHours: 12 });
 
       // when
       const container = await renderHabit(plugin, habitDefinition);
@@ -84,7 +84,7 @@ describe("Habit meta warnings", () => {
       // given
       const plugin = await bootstrapPlugin();
       seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 72 }], NOW);
-      const habitDefinition = buildHabitDefinition({ title: HABIT_TITLE, warnHoursThreshold: 12 });
+      const habitDefinition = buildHabitDefinition({ title: HABIT_TITLE, gracePeriodHours: 12 });
 
       // when
       const container = await renderHabit(plugin, habitDefinition);
@@ -101,7 +101,7 @@ describe("Habit meta warnings", () => {
       // given
       const plugin = await bootstrapPlugin();
       seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 2 }], NOW);
-      const habitDefinition = buildHabitDefinition({ title: HABIT_TITLE, warnHoursThreshold: 12 });
+      const habitDefinition = buildHabitDefinition({ title: HABIT_TITLE, gracePeriodHours: 12 });
 
       // when
       const container = await renderHabit(plugin, habitDefinition);

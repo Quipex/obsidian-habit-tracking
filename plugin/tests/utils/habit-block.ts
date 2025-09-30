@@ -3,14 +3,14 @@ import { flushPromises, renderHabitBlock } from "../harness";
 
 interface HabitBlockOptions {
   title: string;
-  warnHoursThreshold?: number;
+  gracePeriodHours?: number;
   extraLines?: string[];
 }
 
 export function buildHabitDefinition(options: HabitBlockOptions): string {
   const lines = [`title: ${options.title}`];
-  if (typeof options.warnHoursThreshold === "number") {
-    lines.push(`warnHoursThreshold: ${options.warnHoursThreshold}`);
+  if (typeof options.gracePeriodHours === "number") {
+    lines.push(`gracePeriodHours: ${options.gracePeriodHours}`);
   }
   if (options.extraLines?.length) {
     lines.push(...options.extraLines);

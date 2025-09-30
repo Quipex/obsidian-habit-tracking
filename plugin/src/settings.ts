@@ -15,7 +15,7 @@ export interface HabitButtonSettings {
   defaultDotSize: number;
   defaultDotGap: number;
   tagPrefix: string;
-  defaultWarnHoursThreshold: number;
+  defaultGracePeriodHours: number;
   warningWindowHours: number;
   weekStart: "monday" | "sunday";
 }
@@ -32,7 +32,7 @@ export const DEFAULT_SETTINGS: HabitButtonSettings = {
   defaultDotSize: 8,
   defaultDotGap: 4,
   tagPrefix: "habit",
-  defaultWarnHoursThreshold: 24,
+  defaultGracePeriodHours: 24,
   warningWindowHours: 24,
   weekStart: "monday",
 };
@@ -61,7 +61,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         tooltip?: boolean;
       },
     ): void => {
-      const { min, max = Number.POSITIVE_INFINITY, step = 1, value, onChange, tooltip = true } = options;
+      const { min, max = Number.MAX_SAFE_INTEGER, step = 1, value, onChange, tooltip = true } = options;
       const snapToStep = (input: number): number => {
         const stepped = Math.round((input - min) / step) * step + min;
         return Math.min(max, Math.max(min, stepped));
@@ -269,13 +269,13 @@ export class HabitButtonSettingTab extends PluginSettingTab {
 
     addSliderWithNumber(
       new Setting(containerEl)
-        .setName(t("settings.warnThreshold.label"))
-        .setDesc(t("settings.warnThreshold.desc")),
+        .setName(t("settings.gracePeriod.label"))
+        .setDesc(t("settings.gracePeriod.desc")),
       {
         min: 0,
-        value: this.plugin.settings.defaultWarnHoursThreshold,
+        value: this.plugin.settings.defaultGracePeriodHours,
         onChange: async (value) => {
-          this.plugin.settings.defaultWarnHoursThreshold = value;
+          this.plugin.settings.defaultGracePeriodHours = value;
           await this.plugin.saveSettings();
         },
       },

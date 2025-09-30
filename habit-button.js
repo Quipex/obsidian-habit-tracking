@@ -4,7 +4,9 @@
 (() => {
   const {
     title,
+    gracePeriodHours,
     warnHoursThreshold,
+    warningWindowHours,
     icon,
     dailyFolder = "daily",
     // heatmap options
@@ -170,8 +172,13 @@
 
   // ---------- data load ----------
   (async () => {
-    const effWarn = Number.isFinite(warnHoursThreshold) ? Number(warnHoursThreshold) : undefined;
-    const allowedGapH  = (typeof effWarn === "number" && isFinite(effWarn)) ? effWarn + 24 : 48;
+    const windowHours = Number.isFinite(warningWindowHours) ? Number(warningWindowHours) : 24;
+    const effGrace = Number.isFinite(gracePeriodHours)
+      ? Number(gracePeriodHours)
+      : Number.isFinite(warnHoursThreshold)
+        ? Number(warnHoursThreshold)
+        : undefined;
+    const allowedGapH  = (typeof effGrace === "number" && isFinite(effGrace)) ? effGrace + windowHours : 48;
     const allowedGapMs = allowedGapH * 3600000;
 
     const pages = dv.pages(`"${dailyFolder}"`).array();
@@ -282,9 +289,11 @@
       hoursSinceLast = lastTs ? (Date.now() - lastTs.getTime()) / 3600000 : Infinity;
       const isStreakAlive = streak > 0; // streak computed with allowedGap
       const shouldOverdue = (
-        typeof effWarn === "number" && isFinite(effWarn) &&
-        hoursSinceLast >= effWarn &&
-        !isStreakAlive
+        typeof effGrace === "number" && isFinite(effGrace) &&
+        (
+          (isStreakAlive && (allowedGapH - hoursSinceLast) > 0 && (allowedGapH - hoursSinceLast) <= windowHours) ||
+          (!isStreakAlive && hoursSinceLast >= effGrace)
+        )
       );
       lastEl.classList.toggle("is-overdue", shouldOverdue);
 
@@ -296,7 +305,7 @@
       const remH = (typeof hoursSinceLast === "number" && isFinite(hoursSinceLast))
         ? (allowedGapH - hoursSinceLast)
         : -Infinity;
-      if (streak > 0 && remH > 0 && remH <= 24) {
+      if (streak > 0 && remH > 0 && remH <= windowHours) {
         const hint = EL("span", { cls: "time-left" });
         const hrs = Math.ceil(remH);
         hint.textContent = ` <${hrs}ч. 🔥`;
