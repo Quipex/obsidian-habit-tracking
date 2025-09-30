@@ -60,4 +60,25 @@ describe("Habit logging", () => {
 ${habitLine}`);
     expect(button?.classList.contains("is-done")).toBe(true);
   });
+
+  it("respects custom tag prefix when logging", async () => {
+    // given
+    const plugin = await bootstrapPlugin({ tagPrefix: "ritual" });
+    const habitDefinition = `title: Breathwork`;
+    const container = await renderHabitBlock(plugin, habitDefinition);
+    const button = container.querySelector<HTMLButtonElement>(".dv-habit-iconbtn");
+    expect(button).not.toBeNull();
+
+    // when
+    button!.click();
+    await flushPromises();
+
+    // then
+    const dailyPath = getTodayPath(plugin.settings.dailyFolder);
+    const fileContent = plugin.vault.files.get(dailyPath);
+    const habitLine = formatHabitEntryLine(plugin, "breathwork", EXPECTED_TIME);
+    expect(habitLine).toContain("#ritual_breathwork");
+    expect(fileContent).toContain(`- #ritual_breathwork ${EXPECTED_TIME}`);
+    expect(fileContent).not.toContain(`#habit_breathwork`);
+  });
 });
