@@ -19,6 +19,7 @@ type HeatLayout = "grid" | "row";
 interface HabitBlockOptions {
   title?: string;
   gracePeriodHours?: number;
+  warningWindowHours?: number;
   icon?: string;
   dailyFolder?: string;
   heatLayout?: HeatLayout;
@@ -35,6 +36,7 @@ interface ResolvedHabitOptions {
   title: string;
   normalizedTitle: string;
   gracePeriodHours?: number;
+  warningWindowHours: number;
   icon?: string;
   dailyFolder: string;
   heatLayout: HeatLayout;
@@ -281,6 +283,11 @@ export default class HabitButtonPlugin extends Plugin {
     const defaultCellGap = clampPositive(this.settings.defaultCellGap, DEFAULT_SETTINGS.defaultCellGap, 0);
     const defaultDotSize = clampPositive(this.settings.defaultDotSize, DEFAULT_SETTINGS.defaultDotSize);
     const defaultDotGap = clampPositive(this.settings.defaultDotGap, DEFAULT_SETTINGS.defaultDotGap, 0);
+    const defaultWarningWindow = clampPositive(
+      this.settings.warningWindowHours,
+      DEFAULT_SETTINGS.warningWindowHours,
+      0,
+    );
 
     const cellSize = Number.isFinite(raw.cellSize)
       ? clampPositive(Number(raw.cellSize), defaultCellSize)
@@ -303,6 +310,9 @@ export default class HabitButtonPlugin extends Plugin {
       normalizedTitle,
       icon: raw.icon,
       gracePeriodHours: typeof raw.gracePeriodHours === "number" ? raw.gracePeriodHours : undefined,
+      warningWindowHours: Number.isFinite(raw.warningWindowHours)
+        ? clampPositive(Number(raw.warningWindowHours), defaultWarningWindow, 0)
+        : defaultWarningWindow,
       dailyFolder,
       heatLayout: layout,
       weeks,
@@ -365,7 +375,7 @@ export default class HabitButtonPlugin extends Plugin {
     const baseThreshold = Number.isFinite(options.gracePeriodHours)
       ? Math.max(1, Number(options.gracePeriodHours))
       : clampPositive(this.settings.defaultGracePeriodHours, DEFAULT_SETTINGS.defaultGracePeriodHours);
-    const warningWindow = clampPositive(this.settings.warningWindowHours, DEFAULT_SETTINGS.warningWindowHours, 0);
+    const warningWindow = clampPositive(options.warningWindowHours, DEFAULT_SETTINGS.warningWindowHours, 0);
     const allowedGapH = baseThreshold + warningWindow;
     const allowedGapMs = allowedGapH * 3600000;
 

@@ -41,7 +41,7 @@ describe("Habit meta warnings", () => {
     expect(button.classList.contains("is-done")).toBe(false);
   });
 
-describe("gracePeriodHours specified", () => {
+  describe("gracePeriodHours specified", () => {
     it("activates warning when less than a day remains", async () => {
       // given
       const plugin = await bootstrapPlugin();
@@ -110,6 +110,26 @@ describe("gracePeriodHours specified", () => {
       // then
       expect(card.classList.contains("is-done")).toBe(true);
       expect(button.classList.contains("is-done")).toBe(true);
+    });
+
+    it("respects block-level warning window override", async () => {
+      // given
+      const plugin = await bootstrapPlugin();
+      seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 26 }], NOW);
+      const habitDefinition = buildHabitDefinition({
+        title: HABIT_TITLE,
+        gracePeriodHours: 24,
+        warningWindowHours: 6,
+      });
+
+      // when
+      const container = await renderHabit(plugin, habitDefinition);
+      const { last, streak } = getHabitMetaElements(container);
+
+      // then
+      const hint = streak.querySelector<HTMLSpanElement>(".time-left");
+      expect(hint?.textContent).toBe(" <4h 🔥");
+      expect(last.classList.contains("is-overdue")).toBe(true);
     });
   });
 

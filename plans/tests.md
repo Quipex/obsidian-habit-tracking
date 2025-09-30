@@ -1,67 +1,64 @@
-# Functional Testing Plan
+# План расширения тестов Habit Button
 
-## Goals
-- Verify habit widget rendering, command execution, vault mutations, and streak logic through automated functional tests.
-- Ensure localization works across supported languages.
-- Provide infrastructure to extend coverage when new features ship.
+## Подготовка инфраструктуры
+- Доработать `tests/stubs/obsidian.ts`, если для будущих проверок UI потребуются моки `SliderComponent`/`TextComponent`.
+- Добавить в `tests/utils/habit-fixtures.ts` вспомогательную функцию, формирующую строки привычек с учётом текущего префикса из настроек.
+- Научить `bootstrapPlugin` принимать частичные настройки, чтобы легко конфигурировать плагин перед тестом.
 
-## Approach Options
+## Актуализация существующих тестов
+- `meta-warnings.test.ts`: переключить фикстуры на новый helper, проверить предупреждения при использовании глобальных настроек `defaultGracePeriodHours` и `warningWindowHours`.
+- `habit-logging.test.ts`: добавить сценарий с переопределённым префиксом (`ritual`) и удостовериться, что запись добавляется с тегом `#ritual_*`.
+- `render.test.ts`: расширить ожидания, убеждаясь, что DOM содержит кастомную иконку и CSS-переменные, выставленные через настройки.
 
-### 1. Node-based Harness
-- Build fake Obsidian objects (`App`, `Vault`, `TFile`, `MarkdownPostProcessorContext`).
-- Use in-memory vault implementation (Map-based filesystem) for create/append/read.
-- Leverage JSDOM for DOM, running widget rendering and command callbacks in tests.
-- Test scenarios:
-  - Parse YAML block options and resolve defaults.
-  - Render heatmap (grid/row) and verify DOM classes/states.
-  - Click habit button and confirm fake vault logs entry, streak updates, and DOM reflects `is-done`.
-  - Validate localization swaps strings when changing `plugin.settings.locale`.
-- Pros: fast, easy to run in CI, deterministic.
-- Cons: need to maintain API parity with Obsidian’s interfaces.
+## Новые тестовые наборы
+1. **resolveOptions.test.ts**
+   - Ошибочный блок без `title` → `renderError`.
+   - Переопределения `dailyFolder`, `weeks/days`, смена раскладки.
+   - Числа вне диапазона корректно клэмпятся, NaN → значения из настроек.
+   - Проверка кастомных размеров клеток/точек и обрезки `templatePath`.
 
-### 2. Playwright / Electron E2E
-- Launch actual Obsidian app (Electron) pointing to a fixture vault.
-- Automate with Playwright (via CDP) to open notes, insert code blocks, toggle commands, and assert UI.
-- Reset fixture vault between tests.
-- Pros: highest fidelity.
-- Cons: heavier setup, slower execution, more brittle.
+2. **tag-prefix.test.ts**
+   - Префикс `ritual` формирует теги `#ritual_key` и правильно ищет записи.
+   - Санитайз mixed-case и спецсимволов.
+   - Разные привычки не конфликтуют по ключам.
 
-### 3. Hybrid Strategy
-- Core logic covered via Node harness.
-- Light smoke tests via Playwright to ensure integration with real Obsidian.
+3. **habit-stats.test.ts**
+   - Фильтрация по `dailyFolder` (вложенная папка).
+   - Несколько отметок в день увеличивают счётчик и streak.
+   - Игнор файлов не формата YYYY-MM-DD.
+- Вычисление `allowedGapH` = `defaultGracePeriodHours + warningWindowHours`.
+   - Перебивает глобальный порог значением из блока.
+   - `warningWindowHours = 0` отключает предупреждение.
 
-## Infrastructure Tasks
-1. Create `tests/` directory with dedicated tooling (Jest or Vitest).
-2. Implement fake vault + app harness.
-3. Add helper to mount widget for given source string.
-4. Write initial tests for:
-   - Block parsing (YAML, defaults).
-   - Habit logging (file creation/appending, streak recalculation).
-   - Localization toggling.
-5. (Optional) Configure Playwright project with fixture vault for end-to-end checks.
-6. Add npm scripts (`test:functional`, `test:e2e`).
-7. Document how to run tests locally and in CI.
+4. **render-heatmap.test.ts**
+   - Режим `row`: количество точек = `options.days`, последняя дата = сегодня.
+   - Режим `grid`: сетка `weeks × 7`, будущие дни с классом `is-future`.
+   - Проверка смещения начала недели при `weekStart: "sunday"`.
+   - Валидация CSS-переменных (`--habit-cell-size` и т.п.).
 
-## Open Questions
-- Which test runner (Jest, Vitest) fits current toolchain best?
-- How to mock Notices (spy vs. stub) for assertions.
-- E2E feasibility on CI (headless Electron, licensing, runtime).
+5. **icon-behavior.test.ts**
+   - Кастомная иконка отображается до отметки, затем заменяется на `✓` и возвращается при сбросе состояния.
 
-## Next Steps
-- Decide on runner and start with Node harness implementation.
-- Draft first tests: streak logic + click flow.
-- Evaluate feasibility of automated Obsidian launch for E2E.
+6. **template-handling.test.ts**
+   - Создание заметки с шаблоном (контент шаблона + пустая строка + запись).
+   - Отсутствие шаблона → предупреждение в логах, запись всё равно создаётся.
+   - Добаление к существующей заметке сохраняет перевод строки (`ensureTrailingNewline`).
 
-## Current Plugin Functionality
-- Markdown code block `habit-button` renders a habit card with icon, meta row, and heatmap.
-- YAML options supported: title (required), icon, warnHoursThreshold, heatLayout (grid/row), weeks, days, dailyFolder, templatePath, cellSize, cellGap, dotSize, dotGap.
-- Layout selection switches between weekly grid and rolling-day row heatmaps; intensities map to dot-l1..l4 classes.
-- Card reflects completion state for today (`is-done` classes, button text swap).
-- Clicking the button appends an entry to today’s daily note (creates file if missing, optionally seeded from `templatePath`).
-- Habit entries parsed from configured daily folder across vault; counts, streak, last timestamps tracked per ISO date.
-- Streak logic uses warnHoursThreshold to decide allowed gap; overdue hint shows `<Nh 🔥` when close to breaking streak.
-- Settings tab: change daily folder, daily template path, default layout, grid weeks (slider 4–52), row days (slider 30–365), and interface language (auto/en/ru).
-- Command palette entry inserts a pre-configured `habit-button` code block snippet.
-- Localization auto-detects vault language or uses user-selected override; all UI strings switch accordingly.
-- Styles sheet injected on load and removed on unload.
+7. **error-paths.test.ts**
+   - Некорректный YAML → `renderError` без развешенных обработчиков.
+   - Ошибка сохранения (`vault.append` выбрасывает) приводит к уведомлению `ui.noticeError`.
 
+8. **locale-refresh.test.ts**
+   - Язык `ru` переключает локаль через `applyLocale`.
+   - `auto` берёт язык из настроек вольта/браузера.
+
+9. **command-snippet.test.ts**
+   - Команда вставки блока использует текущие настройки (`defaultLayout` и т.д.), а не захардкоженные значения.
+
+10. **settings-ui.test.ts** (при необходимости)
+    - Проверка пары «слайдер + числовой input»: во время ввода ограничение не мешает, по blur значение схлопывается в диапазон.
+    - Пустой префикс превращается в `habit`.
+
+## Регрессионные проверки
+- Убедиться, что `flushPromises` обрабатывает новые асинхронные ветки (добавить вызов там, где ждём обновления DOM).
+- Документировать потенциальные дальнейшие сценарии: мультигодовые данные, снапшоты DOM для сложного CSS.
