@@ -22,6 +22,7 @@ export function formatHabitEntryLine(
 
 interface SeedEntry {
   hoursAgo: number;
+  rawLine?: string;
 }
 
 export function seedHabitEntries(
@@ -38,7 +39,7 @@ export function seedHabitEntries(
     const isoDate = formatIsoDate(timestamp);
     const hhmm = formatHHMM(timestamp);
     const path = `${prefix}${isoDate}.md`;
-    const line = formatHabitEntryLine(plugin, habitKey, hhmm);
+    const line = entry.rawLine ?? formatHabitEntryLine(plugin, habitKey, hhmm);
     const existing = plugin.vault.files.get(path) ?? "";
     const next = existing ? `${existing.trimEnd()}\n${line}\n` : `${line}\n`;
     plugin.vault.files.set(path, next);
