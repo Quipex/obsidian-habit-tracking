@@ -24,7 +24,7 @@ export const DEFAULT_SETTINGS: HabitButtonSettings = {
   dailyFolder: "daily",
   defaultLayout: "grid",
   weeks: 26,
-  days: 240,
+  days: 30,
   templatePath: "meta/templates/daily note template.md",
   locale: "auto",
   defaultCellSize: 9,
