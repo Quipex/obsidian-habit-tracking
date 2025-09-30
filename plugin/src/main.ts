@@ -21,7 +21,6 @@ interface HabitBlockOptions {
   gracePeriodHours?: number;
   warningWindowHours?: number;
   icon?: string;
-  dailyFolder?: string;
   heatLayout?: HeatLayout;
   weeks?: number;
   days?: number;
@@ -29,7 +28,6 @@ interface HabitBlockOptions {
   cellGap?: number;
   dotSize?: number;
   dotGap?: number;
-  templatePath?: string;
 }
 
 interface ResolvedHabitOptions {
@@ -272,11 +270,10 @@ export default class HabitButtonPlugin extends Plugin {
     const weeks = Number.isFinite(raw.weeks) ? Math.max(1, Number(raw.weeks)) : this.settings.weeks;
     const days = Number.isFinite(raw.days) ? Math.max(1, Number(raw.days)) : this.settings.days;
 
-    const dailyFolder = raw.dailyFolder?.trim().length
-      ? trimSlashes(raw.dailyFolder.trim())
-      : this.settings.dailyFolder;
+    const settingsFolder = (this.settings.dailyFolder ?? DEFAULT_SETTINGS.dailyFolder).trim();
+    const dailyFolder = settingsFolder ? trimSlashes(settingsFolder) : "";
 
-    const templateCandidate = raw.templatePath?.trim() || this.settings.templatePath?.trim();
+    const templateCandidate = (this.settings.templatePath ?? "").trim();
     const templatePath = templateCandidate ? templateCandidate : undefined;
 
     const defaultCellSize = clampPositive(this.settings.defaultCellSize, DEFAULT_SETTINGS.defaultCellSize);

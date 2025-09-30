@@ -1,16 +1,10 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
-import { bootstrapPlugin, flushPromises } from "./harness";
+import { bootstrapPlugin, flushPromises, getTodayPath } from "./harness";
 import { renderHabit } from "./utils/habit-block";
 import { getHabitMetaElements } from "./utils/meta-elements";
 import { seedHabitEntries } from "./utils/habit-fixtures";
-import { formatIsoDate } from "./utils/time";
 
 const NOW = new Date("2024-06-15T12:00:00Z");
-
-function todayPath(folder: string): string {
-  const iso = formatIsoDate(new Date(NOW));
-  return folder ? `${folder}/${iso}.md` : `${iso}.md`;
-}
 
 describe("resolveOptions behaviour", () => {
   beforeEach(() => {
@@ -34,14 +28,13 @@ describe("resolveOptions behaviour", () => {
     expect(error?.textContent).toBe("[habit-button] Title is required");
   });
 
-  it("applies block overrides for layout, days, and daily folder", async () => {
+  it("honours block layout overrides while using settings daily folder", async () => {
     // given
-    const plugin = await bootstrapPlugin();
+    const plugin = await bootstrapPlugin({ dailyFolder: " rituals/ " });
     const habitDefinition = [
       "title: Evening Stretch",
       "heatLayout: row",
       "days: 5",
-      "dailyFolder: rituals/",
     ].join("\n");
 
     // when
@@ -58,7 +51,7 @@ describe("resolveOptions behaviour", () => {
     button!.click();
     await flushPromises();
 
-    const expectedPath = todayPath("rituals");
+    const expectedPath = getTodayPath("rituals");
     expect(plugin.vault.files.has(expectedPath)).toBe(true);
   });
 
@@ -109,12 +102,9 @@ describe("resolveOptions behaviour", () => {
 
   it("trims template path before creating a note", async () => {
     // given
-    const plugin = await bootstrapPlugin();
+    const plugin = await bootstrapPlugin({ templatePath: "  templates/daily.md  " });
     plugin.vault.files.set("templates/daily.md", "Template body");
-    const habitDefinition = [
-      "title: Template Test",
-      "templatePath:   templates/daily.md   ",
-    ].join("\n");
+    const habitDefinition = ["title: Template Test"].join("\n");
 
     const container = await renderHabit(plugin, habitDefinition);
     const button = container.querySelector<HTMLButtonElement>(".dv-habit-iconbtn");
@@ -125,7 +115,7 @@ describe("resolveOptions behaviour", () => {
     await flushPromises();
 
     // then
-    const expectedPath = todayPath("daily");
+    const expectedPath = getTodayPath(plugin.settings.dailyFolder);
     const content = plugin.vault.files.get(expectedPath);
     expect(content).toContain("Template body\n");
     expect(content).toMatch(/Template body\n\n- #habit_template_test \d{2}:\d{2}\n/);
