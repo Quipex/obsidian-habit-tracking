@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "27fd549d14bbc487",
+        "id": "d4ffce755d1e3361",
         "type": "tabs",
         "children": [
           {
-            "id": "4627a2e333b693a7",
+            "id": "63c7b4795942ae1f",
             "type": "leaf",
             "state": {
               "type": "canvas",
@@ -16,7 +16,7 @@
                 "file": "Home.canvas",
                 "viewState": {
                   "x": -2120,
-                  "y": -1210,
+                  "y": -1200,
                   "zoom": 0
                 }
               },
@@ -172,13 +172,13 @@
       "bases:Create new base": false
     }
   },
-  "active": "4627a2e333b693a7",
+  "active": "63c7b4795942ae1f",
   "lastOpenFiles": [
-    "Home.canvas",
+    "meta/templates/daily note template.md",
     "daily/2025-10-01.md",
+    "Home.canvas",
     "daily/2025-09-29.md",
     "daily/2025-09-28.md",
-    "meta/templates/daily note template.md",
     "test_vault",
     "plugin/main.js",
     "plugin/package-lock.json",
