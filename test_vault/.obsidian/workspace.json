@@ -4,20 +4,20 @@
     "type": "split",
     "children": [
       {
-        "id": "864ad01774cc3b4c",
+        "id": "27fd549d14bbc487",
         "type": "tabs",
         "children": [
           {
-            "id": "d64673ce1ba56cb2",
+            "id": "4627a2e333b693a7",
             "type": "leaf",
             "state": {
               "type": "canvas",
               "state": {
                 "file": "Home.canvas",
                 "viewState": {
-                  "x": -2127.443440355484,
-                  "y": -1150.2092547565967,
-                  "zoom": -0.0006669672826925913
+                  "x": -2120,
+                  "y": -1210,
+                  "zoom": 0
                 }
               },
               "icon": "lucide-layout-dashboard",
@@ -172,11 +172,12 @@
       "bases:Create new base": false
     }
   },
-  "active": "d64673ce1ba56cb2",
+  "active": "4627a2e333b693a7",
   "lastOpenFiles": [
+    "Home.canvas",
+    "daily/2025-10-01.md",
     "daily/2025-09-29.md",
     "daily/2025-09-28.md",
-    "Home.canvas",
     "meta/templates/daily note template.md",
     "test_vault",
     "plugin/main.js",
@@ -208,7 +209,6 @@
     "plugin/node_modules/obsidian/CHANGELOG.md",
     "plugin/node_modules/style-mod/README.md",
     "plugin/node_modules/style-mod/src/README.md",
-    "plugin/node_modules/@types/estree/README.md",
-    "plugin/node_modules/w3c-keyname/README.md"
+    "plugin/node_modules/@types/estree/README.md"
   ]
 }
