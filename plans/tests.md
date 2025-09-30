@@ -23,12 +23,12 @@
    - [x] Разные привычки не конфликтуют по ключам.
 
 3. **habit-stats.test.ts**
-   - [ ] Фильтрация по `dailyFolder` (вложенная папка).
-   - [ ] Несколько отметок в день увеличивают счётчик и streak.
-   - [ ] Игнор файлов не формата YYYY-MM-DD.
-   - [ ] Вычисление `allowedGapH` = `defaultGracePeriodHours + defaultWarningWindowHours`, приоритет блокового `warningWindowHours`.
-   - [ ] Перебивает глобальный порог значением из блока.
-   - [ ] `warningWindowHours = 0` отключает предупреждение.
+   - [x] Фильтрация по `dailyFolder` (вложенная папка).
+   - [x] Несколько отметок в день увеличивают счётчик и streak.
+   - [x] Игнор файлов не формата YYYY-MM-DD.
+   - [x] Вычисление `allowedGapH` = `defaultGracePeriodHours + defaultWarningWindowHours`, приоритет блокового `warningWindowHours`.
+   - [x] Перебивает глобальный порог значением из блока.
+   - [x] `warningWindowHours = 0` отключает предупреждение.
 
 4. **render-heatmap.test.ts**
    - [ ] Режим `row`: количество точек = `options.days`, последняя дата = сегодня.

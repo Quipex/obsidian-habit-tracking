@@ -21,7 +21,8 @@ export function formatHabitEntryLine(
 }
 
 interface SeedEntry {
-  hoursAgo: number;
+  hoursAgo?: number;
+  isoDate?: string;
   rawLine?: string;
 }
 
@@ -35,9 +36,11 @@ export function seedHabitEntries(
   const prefix = folder ? `${folder.replace(/^\/+|\/+$/g, "")}/` : "";
 
   for (const entry of entries) {
-    const timestamp = new Date(now.getTime() - entry.hoursAgo * 3600000);
-    const isoDate = formatIsoDate(timestamp);
-    const hhmm = formatHHMM(timestamp);
+    const baseDate = entry.isoDate
+      ? new Date(`${entry.isoDate}T${formatHHMM(now)}:00${now.getTimezoneOffset() === 0 ? "Z" : ""}`)
+      : new Date(now.getTime() - (entry.hoursAgo ?? 0) * 3600000);
+    const isoDate = entry.isoDate ?? formatIsoDate(baseDate);
+    const hhmm = formatHHMM(baseDate);
     const path = `${prefix}${isoDate}.md`;
     const line = entry.rawLine ?? formatHabitEntryLine(plugin, habitKey, hhmm);
     const existing = plugin.vault.files.get(path) ?? "";

@@ -14,3 +14,9 @@ export function formatHHMM(date: Date): string {
 export function formatTime(date: Date): string {
   return formatHHMM(date);
 }
+
+export function daysAgo(base: Date, days: number): Date {
+  const copy = new Date(base.getTime());
+  copy.setDate(copy.getDate() - days);
+  return copy;
+}
