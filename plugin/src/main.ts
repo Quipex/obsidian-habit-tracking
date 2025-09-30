@@ -57,6 +57,7 @@ interface HabitStats {
   streak: number;
   allowedGapH: number;
   allowedGapMs: number;
+  warningWindowHours: number;
 }
 
 interface HabitDayParts {
@@ -64,13 +65,6 @@ interface HabitDayParts {
   mo: number;
   d: number;
 }
-
-const DEFAULT_DIMENSIONS = {
-  cellSize: 9,
-  cellGap: 3,
-  dotSize: 8,
-  dotGap: 4,
-};
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -167,6 +161,22 @@ function ensureTrailingNewline(value: string): string {
 
 function trimSlashes(path: string): string {
   return path.replace(/^\/+|\/+$/g, "");
+}
+
+function normalizeTagPrefix(value: string): string {
+  const base = value.trim().toLowerCase();
+  if (!base) return "habit";
+  const sanitized = base
+    .replace(/[^a-zа-яё0-9_]/gi, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return sanitized || "habit";
+}
+
+function clampPositive(value: number, fallback: number, min = 1, max = Number.MAX_SAFE_INTEGER): number {
+  if (!Number.isFinite(value)) return fallback;
+  const rounded = Math.round(value);
+  return Math.min(max, Math.max(min, rounded));
 }
 
 export default class HabitButtonPlugin extends Plugin {
@@ -267,6 +277,27 @@ export default class HabitButtonPlugin extends Plugin {
     const templateCandidate = raw.templatePath?.trim() || this.settings.templatePath?.trim();
     const templatePath = templateCandidate ? templateCandidate : undefined;
 
+    const defaultCellSize = clampPositive(this.settings.defaultCellSize, DEFAULT_SETTINGS.defaultCellSize);
+    const defaultCellGap = clampPositive(this.settings.defaultCellGap, DEFAULT_SETTINGS.defaultCellGap, 0);
+    const defaultDotSize = clampPositive(this.settings.defaultDotSize, DEFAULT_SETTINGS.defaultDotSize);
+    const defaultDotGap = clampPositive(this.settings.defaultDotGap, DEFAULT_SETTINGS.defaultDotGap, 0);
+
+    const cellSize = Number.isFinite(raw.cellSize)
+      ? clampPositive(Number(raw.cellSize), defaultCellSize)
+      : defaultCellSize;
+    const cellGap = Number.isFinite(raw.cellGap)
+      ? clampPositive(Number(raw.cellGap), defaultCellGap, 0)
+      : defaultCellGap;
+    const dotSize = Number.isFinite(raw.dotSize)
+      ? clampPositive(Number(raw.dotSize), defaultDotSize)
+      : defaultDotSize;
+    const dotGap = Number.isFinite(raw.dotGap)
+      ? clampPositive(Number(raw.dotGap), defaultDotGap, 0)
+      : defaultDotGap;
+
+    const tagPrefix = normalizeTagPrefix(this.settings.tagPrefix ?? DEFAULT_SETTINGS.tagPrefix);
+    const habitKey = toHabitKey(title);
+
     return {
       title,
       normalizedTitle,
@@ -276,13 +307,13 @@ export default class HabitButtonPlugin extends Plugin {
       heatLayout: layout,
       weeks,
       days,
-      cellSize: Number.isFinite(raw.cellSize) ? Number(raw.cellSize) : DEFAULT_DIMENSIONS.cellSize,
-      cellGap: Number.isFinite(raw.cellGap) ? Number(raw.cellGap) : DEFAULT_DIMENSIONS.cellGap,
-      dotSize: Number.isFinite(raw.dotSize) ? Number(raw.dotSize) : DEFAULT_DIMENSIONS.dotSize,
-      dotGap: Number.isFinite(raw.dotGap) ? Number(raw.dotGap) : DEFAULT_DIMENSIONS.dotGap,
+      cellSize,
+      cellGap,
+      dotSize,
+      dotGap,
       templatePath,
-      habitKey: toHabitKey(title),
-      habitTag: `#habit_${toHabitKey(title)}`,
+      habitKey,
+      habitTag: `#${tagPrefix}_${habitKey}`,
     };
   }
 
@@ -298,7 +329,8 @@ export default class HabitButtonPlugin extends Plugin {
       .getMarkdownFiles() as TFile[])
       .filter((file) => (folder ? file.path.startsWith(folderPrefix) : true));
 
-    const habitRegex = new RegExp(`${escapeRegExp("#habit_")}([^\\s#]+)(?:\\s+(\\d{1,2}:\\d{2}))?`, "gim");
+    const tagPrefix = normalizeTagPrefix(this.settings.tagPrefix ?? DEFAULT_SETTINGS.tagPrefix);
+    const habitRegex = new RegExp(`${escapeRegExp(`#${tagPrefix}_`)}([^\\s#]+)(?:\\s+(\\d{1,2}:\\d{2}))?`, "gim");
     const needle = options.habitKey.toLowerCase();
 
     for (const file of files) {
@@ -330,9 +362,11 @@ export default class HabitButtonPlugin extends Plugin {
       }
     }
 
-    const allowedGapH = Number.isFinite(options.warnHoursThreshold)
-      ? Math.max(1, Number(options.warnHoursThreshold)) + 24
-      : 48;
+    const baseThreshold = Number.isFinite(options.warnHoursThreshold)
+      ? Math.max(1, Number(options.warnHoursThreshold))
+      : clampPositive(this.settings.defaultWarnHoursThreshold, DEFAULT_SETTINGS.defaultWarnHoursThreshold);
+    const warningWindow = clampPositive(this.settings.warningWindowHours, DEFAULT_SETTINGS.warningWindowHours, 0);
+    const allowedGapH = baseThreshold + warningWindow;
     const allowedGapMs = allowedGapH * 3600000;
 
     const dayTimestamps = sortDatesAscending(lastTsByISO.values());
@@ -347,6 +381,7 @@ export default class HabitButtonPlugin extends Plugin {
       streak,
       allowedGapH,
       allowedGapMs,
+      warningWindowHours: warningWindow,
     };
   }
 
@@ -429,8 +464,9 @@ export default class HabitButtonPlugin extends Plugin {
         ? currentStats.allowedGapH - hoursSinceLast
         : Infinity;
       const isStreakBroken = hasLastMark && !isStreakAlive;
+      const warnWindow = currentStats.warningWindowHours;
       const shouldWarn =
-        (isStreakAlive && remainingHours > 0 && remainingHours <= 24) ||
+        (isStreakAlive && remainingHours > 0 && remainingHours <= warnWindow) ||
         (isStreakBroken && Number.isFinite(hoursSinceLast));
       lastElement.classList.toggle("is-overdue", shouldWarn);
 
@@ -442,7 +478,7 @@ export default class HabitButtonPlugin extends Plugin {
       streakElement.classList.toggle("is-zero", currentStats.streak === 0);
 
       const remH = remainingHours;
-      if (currentStats.streak > 0 && remH > 0 && remH <= 24) {
+      if (currentStats.streak > 0 && remH > 0 && remH <= warnWindow) {
         const hint = streakElement.createSpan({ cls: "time-left" });
         const hrs = Math.ceil(remH);
         hint.textContent = ` ${t("overdue.label", hrs)}`;
@@ -532,7 +568,8 @@ export default class HabitButtonPlugin extends Plugin {
     heat.empty();
 
     const today = today0();
-    const isoDow = (today.getDay() + 6) % 7; // Mon=0..Sun=6
+    const weekStart = this.settings.weekStart ?? DEFAULT_SETTINGS.weekStart;
+    const isoDow = weekStart === "sunday" ? today.getDay() : (today.getDay() + 6) % 7; // Mon=0..Sun=6
     const start = new Date(today);
     start.setDate(today.getDate() - isoDow - (options.weeks - 1) * 7);
 

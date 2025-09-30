@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting, SliderComponent, TextComponent } from "obsidian";
 import HabitButtonPlugin from "./main";
 import { t } from "./i18n";
 import type { LocalePreference } from "./i18n";
@@ -10,6 +10,14 @@ export interface HabitButtonSettings {
   days: number;
   templatePath: string;
   locale: LocalePreference;
+  defaultCellSize: number;
+  defaultCellGap: number;
+  defaultDotSize: number;
+  defaultDotGap: number;
+  tagPrefix: string;
+  defaultWarnHoursThreshold: number;
+  warningWindowHours: number;
+  weekStart: "monday" | "sunday";
 }
 
 export const DEFAULT_SETTINGS: HabitButtonSettings = {
@@ -19,6 +27,14 @@ export const DEFAULT_SETTINGS: HabitButtonSettings = {
   days: 240,
   templatePath: "meta/templates/daily note template.md",
   locale: "auto",
+  defaultCellSize: 9,
+  defaultCellGap: 3,
+  defaultDotSize: 8,
+  defaultDotGap: 4,
+  tagPrefix: "habit",
+  defaultWarnHoursThreshold: 24,
+  warningWindowHours: 24,
+  weekStart: "monday",
 };
 
 export class HabitButtonSettingTab extends PluginSettingTab {
@@ -33,6 +49,98 @@ export class HabitButtonSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
     containerEl.createEl("h2", { text: t("settings.heading") });
+
+    const addSliderWithNumber = (
+      setting: Setting,
+      options: {
+        min: number;
+        max?: number;
+        step?: number;
+        value: number;
+        onChange: (value: number) => Promise<void> | void;
+        tooltip?: boolean;
+      },
+    ): void => {
+      const { min, max = Number.POSITIVE_INFINITY, step = 1, value, onChange, tooltip = true } = options;
+      const snapToStep = (input: number): number => {
+        const stepped = Math.round((input - min) / step) * step + min;
+        return Math.min(max, Math.max(min, stepped));
+      };
+
+      let sliderRef: SliderComponent;
+      let textRef: TextComponent;
+      let syncing = false;
+      let lastValue = snapToStep(value);
+
+      const applyValue = async (
+        candidate: number,
+        origin: "slider" | "text" | "blur",
+      ): Promise<void> => {
+        const snapped = snapToStep(candidate);
+        const changed = snapped !== lastValue;
+        syncing = true;
+        try {
+          if (origin !== "slider") sliderRef.setValue(snapped);
+          if (origin !== "text") textRef.setValue(String(snapped));
+          if (changed) {
+            lastValue = snapped;
+            await onChange(snapped);
+          } else {
+            lastValue = snapped;
+          }
+        } finally {
+          syncing = false;
+        }
+      };
+
+      setting.addSlider((slider) => {
+        sliderRef = slider
+          .setLimits(min, max, step)
+          .setValue(lastValue);
+
+        if (tooltip) slider.setDynamicTooltip();
+
+        slider.onChange(async (newValue: number) => {
+          if (syncing) return;
+          await applyValue(newValue, "slider");
+        });
+      });
+
+      setting.addText((text) => {
+        textRef = text;
+        const inputEl = text.inputEl;
+        inputEl.type = "number";
+        inputEl.step = String(step);
+        inputEl.min = String(min);
+        inputEl.max = String(max);
+        text.setValue(String(lastValue));
+
+        text.onChange(async (raw) => {
+          if (syncing) return;
+          const trimmed = raw.trim();
+          if (trimmed === "") return;
+          const parsed = Number(trimmed);
+          if (!Number.isFinite(parsed)) return;
+          if (parsed < min || parsed > max) return;
+          await applyValue(parsed, "text");
+        });
+
+        inputEl.addEventListener("blur", async () => {
+          if (syncing) return;
+          const raw = text.getValue().trim();
+          if (raw === "") {
+            await applyValue(lastValue, "blur");
+            return;
+          }
+          const parsed = Number(raw);
+          if (!Number.isFinite(parsed)) {
+            await applyValue(lastValue, "blur");
+            return;
+          }
+          await applyValue(parsed, "blur");
+        });
+      });
+    };
 
     new Setting(containerEl)
       .setName(t("settings.language.label"))
@@ -81,6 +189,130 @@ export class HabitButtonSettingTab extends PluginSettingTab {
           }),
       );
 
+    containerEl.createEl("h3", { text: t("settings.dimensions.heading") });
+
+    addSliderWithNumber(
+      new Setting(containerEl)
+        .setName(t("settings.dimensions.cellSize.label"))
+        .setDesc(t("settings.dimensions.cellSize.desc")),
+      {
+        min: 1,
+        max: 100,
+        value: this.plugin.settings.defaultCellSize,
+        onChange: async (value) => {
+          this.plugin.settings.defaultCellSize = value;
+          await this.plugin.saveSettings();
+        },
+      },
+    );
+
+    addSliderWithNumber(
+      new Setting(containerEl)
+        .setName(t("settings.dimensions.cellGap.label"))
+        .setDesc(t("settings.dimensions.cellGap.desc")),
+      {
+        min: 0,
+        max: 20,
+        value: this.plugin.settings.defaultCellGap,
+        onChange: async (value) => {
+          this.plugin.settings.defaultCellGap = value;
+          await this.plugin.saveSettings();
+        },
+      },
+    );
+
+    addSliderWithNumber(
+      new Setting(containerEl)
+        .setName(t("settings.dimensions.dotSize.label"))
+        .setDesc(t("settings.dimensions.dotSize.desc")),
+      {
+        min: 1,
+        max: 100,
+        value: this.plugin.settings.defaultDotSize,
+        onChange: async (value) => {
+          this.plugin.settings.defaultDotSize = value;
+          await this.plugin.saveSettings();
+        },
+      },
+    );
+
+    addSliderWithNumber(
+      new Setting(containerEl)
+        .setName(t("settings.dimensions.dotGap.label"))
+        .setDesc(t("settings.dimensions.dotGap.desc")),
+      {
+        min: 0,
+        max: 20,
+        value: this.plugin.settings.defaultDotGap,
+        onChange: async (value) => {
+          this.plugin.settings.defaultDotGap = value;
+          await this.plugin.saveSettings();
+        },
+      },
+    );
+
+    containerEl.createEl("h3", { text: t("settings.habits.heading") });
+
+    new Setting(containerEl)
+      .setName(t("settings.tagPrefix.label"))
+      .setDesc(t("settings.tagPrefix.desc"))
+      .addText((text) =>
+        text
+          .setPlaceholder("habit")
+          .setValue(this.plugin.settings.tagPrefix)
+          .onChange(async (value: string) => {
+            const normalized = value.trim() || "habit";
+            this.plugin.settings.tagPrefix = normalized;
+            await this.plugin.saveSettings();
+          }),
+      );
+
+    addSliderWithNumber(
+      new Setting(containerEl)
+        .setName(t("settings.warnThreshold.label"))
+        .setDesc(t("settings.warnThreshold.desc")),
+      {
+        min: 0,
+        value: this.plugin.settings.defaultWarnHoursThreshold,
+        onChange: async (value) => {
+          this.plugin.settings.defaultWarnHoursThreshold = value;
+          await this.plugin.saveSettings();
+        },
+      },
+    );
+
+    addSliderWithNumber(
+      new Setting(containerEl)
+        .setName(t("settings.warnWindow.label"))
+        .setDesc(t("settings.warnWindow.desc")),
+      {
+        min: 0,
+        value: this.plugin.settings.warningWindowHours,
+        onChange: async (value) => {
+          this.plugin.settings.warningWindowHours = value;
+          await this.plugin.saveSettings();
+        },
+      },
+    );
+
+    new Setting(containerEl)
+      .setName(t("settings.weekStart.label"))
+      .setDesc(t("settings.weekStart.desc"))
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOptions({
+            monday: t("settings.weekStart.options.monday"),
+            sunday: t("settings.weekStart.options.sunday"),
+          })
+          .setValue(this.plugin.settings.weekStart)
+          .onChange(async (value: "monday" | "sunday") => {
+            if (value === "monday" || value === "sunday") {
+              this.plugin.settings.weekStart = value;
+              await this.plugin.saveSettings();
+            }
+          }),
+      );
+
     new Setting(containerEl)
       .setName(t("settings.defaultLayout.label"))
       .setDesc(t("settings.defaultLayout.desc"))
@@ -96,32 +328,32 @@ export class HabitButtonSettingTab extends PluginSettingTab {
           }),
       );
 
-    new Setting(containerEl)
-      .setName(t("settings.gridWeeks.label"))
-      .setDesc(t("settings.gridWeeks.desc"))
-      .addSlider((slider) =>
-        slider
-          .setLimits(4, 52, 1)
-          .setValue(this.plugin.settings.weeks)
-          .setDynamicTooltip()
-          .onChange(async (value: number) => {
-            this.plugin.settings.weeks = value;
-            await this.plugin.saveSettings();
-          }),
-      );
+    addSliderWithNumber(
+      new Setting(containerEl)
+        .setName(t("settings.gridWeeks.label"))
+        .setDesc(t("settings.gridWeeks.desc")),
+      {
+        min: 1,
+        value: this.plugin.settings.weeks,
+        onChange: async (value) => {
+          this.plugin.settings.weeks = value;
+          await this.plugin.saveSettings();
+        },
+      },
+    );
 
-    new Setting(containerEl)
-      .setName(t("settings.rowDays.label"))
-      .setDesc(t("settings.rowDays.desc"))
-      .addSlider((slider) =>
-        slider
-          .setLimits(30, 365, 5)
-          .setValue(this.plugin.settings.days)
-          .setDynamicTooltip()
-          .onChange(async (value: number) => {
-            this.plugin.settings.days = value;
-            await this.plugin.saveSettings();
-          }),
-      );
+    addSliderWithNumber(
+      new Setting(containerEl)
+        .setName(t("settings.rowDays.label"))
+        .setDesc(t("settings.rowDays.desc")),
+      {
+        min: 1,
+        value: this.plugin.settings.days,
+        onChange: async (value) => {
+          this.plugin.settings.days = value;
+          await this.plugin.saveSettings();
+        },
+      },
+    );
   }
 }
