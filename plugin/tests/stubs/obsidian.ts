@@ -1,12 +1,20 @@
 import { parse as parseYamlLib } from "yaml";
-export type MarkdownPostProcessor = (source: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => void | Promise<any>;
+
+export type MarkdownPostProcessor = (
+  source: string,
+  el: HTMLElement,
+  ctx: MarkdownPostProcessorContext,
+) => void | Promise<any>;
 
 export interface MarkdownPostProcessorContext {}
-
 
 export class App {
   vault: any;
   workspace: any;
+  constructor() {
+    this.vault = {};
+    this.workspace = {};
+  }
 }
 
 export interface Command {
@@ -27,6 +35,143 @@ export interface PluginManifest {
   isDesktopOnly: boolean;
 }
 
+type ChangeHandler<T> = (value: T) => void | Promise<void>;
+
+export class SliderComponent {
+  inputEl: HTMLInputElement;
+  private min = 0;
+  private max = 100;
+  private step = 1;
+  private value = 0;
+  private onChangeHandlers: ChangeHandler<number>[] = [];
+
+  constructor(container?: HTMLElement) {
+    this.inputEl = document.createElement("input");
+    this.inputEl.type = "range";
+    if (container) container.appendChild(this.inputEl);
+  }
+
+  setLimits(min: number, max: number, step: number): this {
+    this.min = min;
+    this.max = max;
+    this.step = step;
+    this.inputEl.min = String(min);
+    this.inputEl.max = String(max);
+    this.inputEl.step = String(step);
+    return this;
+  }
+
+  setValue(value: number): this {
+    this.value = value;
+    this.inputEl.value = String(value);
+    return this;
+  }
+
+  getValue(): number {
+    return this.value;
+  }
+
+  onChange(handler: ChangeHandler<number>): this {
+    this.onChangeHandlers.push(handler);
+    return this;
+  }
+
+  setDynamicTooltip(): this {
+    return this;
+  }
+
+  async triggerChange(value: number): Promise<void> {
+    this.setValue(value);
+    for (const handler of this.onChangeHandlers) {
+      await handler(value);
+    }
+  }
+}
+
+export class TextComponent {
+  inputEl: HTMLInputElement;
+  private value = "";
+  private onChangeHandlers: ChangeHandler<string>[] = [];
+
+  constructor(container?: HTMLElement) {
+    this.inputEl = document.createElement("input");
+    if (container) container.appendChild(this.inputEl);
+  }
+
+  setPlaceholder(value: string): this {
+    this.inputEl.placeholder = value;
+    return this;
+  }
+
+  setValue(value: string): this {
+    this.value = value;
+    this.inputEl.value = value;
+    return this;
+  }
+
+  getValue(): string {
+    return this.inputEl.value ?? this.value;
+  }
+
+  onChange(handler: ChangeHandler<string>): this {
+    this.onChangeHandlers.push(handler);
+    return this;
+  }
+
+  async triggerChange(value: string): Promise<void> {
+    this.setValue(value);
+    for (const handler of this.onChangeHandlers) {
+      await handler(value);
+    }
+  }
+}
+
+export class DropdownComponent {
+  selectEl: HTMLSelectElement;
+  private options: Record<string, string> = {};
+  private value = "";
+  private onChangeHandlers: ChangeHandler<string>[] = [];
+
+  constructor(container?: HTMLElement) {
+    this.selectEl = document.createElement("select");
+    if (container) container.appendChild(this.selectEl);
+  }
+
+  addOptions(options: Record<string, string>): this {
+    this.options = { ...this.options, ...options };
+    this.selectEl.innerHTML = "";
+    for (const [value, label] of Object.entries(this.options)) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      this.selectEl.appendChild(option);
+    }
+    return this;
+  }
+
+  setValue(value: string): this {
+    this.value = value;
+    this.selectEl.value = value;
+    return this;
+  }
+
+  getValue(): string {
+    return this.selectEl.value ?? this.value;
+  }
+
+  onChange(handler: ChangeHandler<string>): this {
+    this.onChangeHandlers.push(handler);
+    return this;
+  }
+
+  async triggerChange(value: string): Promise<void> {
+    this.setValue(value);
+    for (const handler of this.onChangeHandlers) {
+      await handler(value);
+    }
+  }
+}
+
 export class Plugin {
   app: any;
   manifest: PluginManifest;
@@ -42,7 +187,9 @@ export class Plugin {
     return processor;
   }
   register(_onunload: () => void): void {}
-  async loadData(): Promise<any> { return null; }
+  async loadData(): Promise<any> {
+    return null;
+  }
   async saveData(_data: any): Promise<void> {}
 }
 
@@ -67,11 +214,31 @@ export class Setting {
     this.containerEl = containerEl;
   }
 
-  setName(_name: string): this { return this; }
-  setDesc(_desc: string): this { return this; }
-  addText(cb: (text: any) => void): this { cb({}); return this; }
-  addDropdown(cb: (dropdown: any) => void): this { cb({}); return this; }
-  addSlider(cb: (slider: any) => void): this { cb({}); return this; }
+  setName(_name: string): this {
+    return this;
+  }
+
+  setDesc(_desc: string): this {
+    return this;
+  }
+
+  addText(cb: (text: TextComponent) => void): this {
+    const text = new TextComponent(this.containerEl);
+    cb(text);
+    return this;
+  }
+
+  addDropdown(cb: (dropdown: DropdownComponent) => void): this {
+    const dropdown = new DropdownComponent(this.containerEl);
+    cb(dropdown);
+    return this;
+  }
+
+  addSlider(cb: (slider: SliderComponent) => void): this {
+    const slider = new SliderComponent(this.containerEl);
+    cb(slider);
+    return this;
+  }
 }
 
 export function setIcon(_el: HTMLElement, _icon: string): void {}

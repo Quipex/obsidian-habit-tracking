@@ -1,9 +1,10 @@
 import { vi } from "vitest";
-import type {
+import {
   Command,
   MarkdownPostProcessor,
   MarkdownPostProcessorContext,
   PluginManifest,
+  TFile,
 } from "obsidian";
 import HabitButtonPlugin from "../src/main";
 import type { HabitButtonSettings } from "../src/settings";
@@ -22,6 +23,10 @@ class FakeVault {
     return this.files.get(file.path) ?? "";
   }
 
+  async read(file: { path: string }) {
+    return this.cachedRead(file);
+  }
+
   async create(path: string, content: string) {
     this.files.set(path, content);
   }
@@ -32,7 +37,10 @@ class FakeVault {
 
   getAbstractFileByPath(path: string) {
     if (!this.files.has(path)) return null;
-    return { path };
+    const file = new TFile();
+    file.path = path;
+    file.basename = path.replace(/^.*\//, "").replace(/\.md$/, "");
+    return file;
   }
 }
 
@@ -61,9 +69,11 @@ export class PluginHarness extends HabitButtonPlugin {
   public settingTabs: any[] = [];
   public cleanups: Array<() => void> = [];
   public savedSettings?: HabitButtonSettings;
+  private initialSettings?: Partial<HabitButtonSettings> | null;
 
-  constructor() {
+  constructor(initialSettings?: Partial<HabitButtonSettings> | null) {
     super(new FakeApp() as any, manifest);
+    this.initialSettings = initialSettings ?? null;
   }
 
   get fakeApp(): FakeApp {
@@ -96,7 +106,7 @@ export class PluginHarness extends HabitButtonPlugin {
   }
 
   override async loadData(): Promise<Partial<HabitButtonSettings> | null> {
-    return null;
+    return this.initialSettings ?? null;
   }
 
   override async saveData(data: HabitButtonSettings): Promise<void> {
@@ -104,8 +114,8 @@ export class PluginHarness extends HabitButtonPlugin {
   }
 }
 
-export async function bootstrapPlugin(): Promise<PluginHarness> {
-  const plugin = new PluginHarness();
+export async function bootstrapPlugin(settings?: Partial<HabitButtonSettings>): Promise<PluginHarness> {
+  const plugin = new PluginHarness(settings ?? null);
   await plugin.onload();
   return plugin;
 }

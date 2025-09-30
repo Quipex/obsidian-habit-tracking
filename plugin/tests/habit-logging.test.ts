@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from "vitest";
 import { bootstrapPlugin, getTodayPath, renderHabitBlock, flushPromises } from "./harness";
 import { formatTime } from "./utils/time";
+import { formatHabitEntryLine } from "./utils/habit-fixtures";
 
 const FIXED_DATE = new Date("2024-06-15T08:30:00Z");
 const EXPECTED_TIME = formatTime(new Date(FIXED_DATE));
@@ -31,7 +32,8 @@ describe("Habit logging", () => {
     // then
     const dailyPath = getTodayPath(plugin.settings.dailyFolder);
     const fileContent = plugin.vault.files.get(dailyPath);
-    expect(fileContent).toContain(`- #habit_morning_walk ${EXPECTED_TIME}`);
+    const habitLine = formatHabitEntryLine(plugin, "morning_walk", EXPECTED_TIME);
+    expect(fileContent).toContain(habitLine);
     expect(button?.classList.contains("is-done")).toBe(true);
   });
 
@@ -52,9 +54,10 @@ describe("Habit logging", () => {
 
     // then
     const fileContent = plugin.vault.files.get(dailyPath);
+    const habitLine = formatHabitEntryLine(plugin, "creatine", EXPECTED_TIME);
     expect(fileContent).toContain(`# Daily note
 
-- #habit_creatine ${EXPECTED_TIME}`);
+${habitLine}`);
     expect(button?.classList.contains("is-done")).toBe(true);
   });
 });
