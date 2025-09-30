@@ -16,7 +16,7 @@ export interface HabitButtonSettings {
   defaultDotGap: number;
   tagPrefix: string;
   defaultGracePeriodHours: number;
-  warningWindowHours: number;
+  defaultWarningWindowHours: number;
   weekStart: "monday" | "sunday";
 }
 
@@ -33,7 +33,7 @@ export const DEFAULT_SETTINGS: HabitButtonSettings = {
   defaultDotGap: 4,
   tagPrefix: "habit",
   defaultGracePeriodHours: 24,
-  warningWindowHours: 24,
+  defaultWarningWindowHours: 24,
   weekStart: "monday",
 };
 
@@ -287,9 +287,9 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.warnWindow.desc")),
       {
         min: 0,
-        value: this.plugin.settings.warningWindowHours,
+        value: this.plugin.settings.defaultWarningWindowHours,
         onChange: async (value) => {
-          this.plugin.settings.warningWindowHours = value;
+          this.plugin.settings.defaultWarningWindowHours = value;
           await this.plugin.saveSettings();
         },
       },

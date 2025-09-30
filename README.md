@@ -31,14 +31,14 @@ The path in `dv.view("…")` should point to the file without the `.js` extensio
 - On click, writes a line to today’s daily file: `- #habit_<key> HH:MM`.
 - By default, daily files are looked up/created in the `daily` folder as `YYYY-MM-DD.md`.
 - The habit key is derived from `title`: lowercased, spaces → `_`, non‑letter/digit/underscore removed, consecutive underscores collapsed.
-- The streak is calculated by unique days with an allowed gap of `gracePeriodHours + warningWindowHours` (defaults to `24h + 24h`).
+- The streak is calculated by unique days with an allowed gap of `gracePeriodHours + warningWindowHours` (defaults to `defaultGracePeriodHours + defaultWarningWindowHours = 24h + 24h`).
 - Visualization: a heatmap by days (`row`) or by weeks (`grid`), with the newest days/weeks on the right.
 
 ## Parameters (input)
 
 - `title` (string, required): habit title.
 - `icon` (string, optional): emoji on the button (defaults to ✅).
-- `gracePeriodHours` (number, optional): hours without a mark before the streak breaks. Added to `warningWindowHours` to determine the warning window.
+- `gracePeriodHours` (number, optional): hours without a mark before the streak breaks. Added to `warningWindowHours` (or the `defaultWarningWindowHours` setting when omitted) to determine the warning window.
 - `dailyFolder` (string, optional): folder for daily notes. Defaults to `"daily"`.
 - Heatmap:
   - `heatLayout`: `"grid"` or `"row"` (defaults to `"grid"`).

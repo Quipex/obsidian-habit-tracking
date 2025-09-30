@@ -284,8 +284,8 @@ export default class HabitButtonPlugin extends Plugin {
     const defaultDotSize = clampPositive(this.settings.defaultDotSize, DEFAULT_SETTINGS.defaultDotSize);
     const defaultDotGap = clampPositive(this.settings.defaultDotGap, DEFAULT_SETTINGS.defaultDotGap, 0);
     const defaultWarningWindow = clampPositive(
-      this.settings.warningWindowHours,
-      DEFAULT_SETTINGS.warningWindowHours,
+      this.settings.defaultWarningWindowHours,
+      DEFAULT_SETTINGS.defaultWarningWindowHours,
       0,
     );
 
@@ -375,7 +375,11 @@ export default class HabitButtonPlugin extends Plugin {
     const baseThreshold = Number.isFinite(options.gracePeriodHours)
       ? Math.max(1, Number(options.gracePeriodHours))
       : clampPositive(this.settings.defaultGracePeriodHours, DEFAULT_SETTINGS.defaultGracePeriodHours);
-    const warningWindow = clampPositive(options.warningWindowHours, DEFAULT_SETTINGS.warningWindowHours, 0);
+    const warningWindow = clampPositive(
+      options.warningWindowHours,
+      DEFAULT_SETTINGS.defaultWarningWindowHours,
+      0,
+    );
     const allowedGapH = baseThreshold + warningWindow;
     const allowedGapMs = allowedGapH * 3600000;
 

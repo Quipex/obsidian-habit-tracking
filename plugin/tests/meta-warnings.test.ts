@@ -133,6 +133,51 @@ describe("Habit meta warnings", () => {
     });
   });
 
+  describe("global threshold settings", () => {
+    it("uses plugin defaults when block omits overrides", async () => {
+      // given
+      const plugin = await bootstrapPlugin({
+        defaultGracePeriodHours: 48,
+        defaultWarningWindowHours: 6,
+      });
+      seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 50 }], NOW);
+      const habitDefinition = buildHabitDefinition({ title: HABIT_TITLE });
+
+      // when
+      const container = await renderHabit(plugin, habitDefinition);
+      const { last, streak } = getHabitMetaElements(container);
+
+      // then
+      expect(last.classList.contains("is-overdue")).toBe(true);
+      const timeLeft = streak.querySelector<HTMLSpanElement>(".time-left");
+      expect(timeLeft?.textContent).toBe(" <4h 🔥");
+      expect(streak.classList.contains("is-zero")).toBe(false);
+    });
+
+    it("keeps warning window from block when provided", async () => {
+      // given
+      const plugin = await bootstrapPlugin({
+        defaultGracePeriodHours: 36,
+        defaultWarningWindowHours: 12,
+      });
+      seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 39 }], NOW);
+      const habitDefinition = buildHabitDefinition({
+        title: HABIT_TITLE,
+        warningWindowHours: 4,
+      });
+
+      // when
+      const container = await renderHabit(plugin, habitDefinition);
+      const { last, streak } = getHabitMetaElements(container);
+
+      // then
+      expect(last.classList.contains("is-overdue")).toBe(true);
+      const timeLeft = streak.querySelector<HTMLSpanElement>(".time-left");
+      expect(timeLeft?.textContent).toBe(" <1h 🔥");
+      expect(streak.classList.contains("is-zero")).toBe(false);
+    });
+  });
+
   describe("default threshold behavior", () => {
     it("follows default warning window when less than a day remains", async () => {
       // given

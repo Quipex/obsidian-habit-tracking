@@ -6,7 +6,7 @@
 - [x] Научить `bootstrapPlugin` принимать частичные настройки, чтобы легко конфигурировать плагин перед тестом.
 
 ## Актуализация существующих тестов
-- [ ] `meta-warnings.test.ts`: переключить фикстуры на новый helper, проверить предупреждения при использовании глобальных настроек `defaultGracePeriodHours` и `warningWindowHours`, а также блоковый override `warningWindowHours`.
+- [x] `meta-warnings.test.ts`: переключить фикстуры на новый helper, проверить предупреждения при использовании глобальных настроек `defaultGracePeriodHours` и `defaultWarningWindowHours`, а также блоковый override `warningWindowHours`.
 - [ ] `habit-logging.test.ts`: добавить сценарий с переопределённым префиксом (`ritual`) и удостовериться, что запись добавляется с тегом `#ritual_*`.
 - [ ] `render.test.ts`: расширить ожидания, убеждаясь, что DOM содержит кастомную иконку и CSS-переменные, выставленные через настройки.
 
@@ -14,7 +14,7 @@
 1. **resolveOptions.test.ts**
    - [ ] Ошибочный блок без `title` → `renderError`.
    - [ ] Переопределения `dailyFolder`, `weeks/days`, смена раскладки.
-   - [ ] Числа вне диапазона корректно клэмпятся, NaN → значения из настроек (включая `warningWindowHours`).
+   - [ ] Числа вне диапазона корректно клэмпятся, NaN → значения из настроек (включая `defaultWarningWindowHours`).
    - [ ] Проверка кастомных размеров клеток/точек и обрезки `templatePath`.
 
 2. **tag-prefix.test.ts**
@@ -26,7 +26,7 @@
    - [ ] Фильтрация по `dailyFolder` (вложенная папка).
    - [ ] Несколько отметок в день увеличивают счётчик и streak.
    - [ ] Игнор файлов не формата YYYY-MM-DD.
-   - [ ] Вычисление `allowedGapH` = `defaultGracePeriodHours + warningWindowHours`, приоритет блокового `warningWindowHours`.
+   - [ ] Вычисление `allowedGapH` = `defaultGracePeriodHours + defaultWarningWindowHours`, приоритет блокового `warningWindowHours`.
    - [ ] Перебивает глобальный порог значением из блока.
    - [ ] `warningWindowHours = 0` отключает предупреждение.
 
