@@ -12,6 +12,10 @@ import type { HabitButtonSettings } from "../src/settings";
 class FakeVault {
   files: Map<string, string> = new Map();
 
+  constructor() {
+    this.files.set("meta/templates/daily note template.md", "");
+  }
+
   getMarkdownFiles() {
     return Array.from(this.files.keys()).map((path) => ({
       path,

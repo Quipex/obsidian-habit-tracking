@@ -632,6 +632,8 @@ export default class HabitButtonPlugin extends Plugin {
           } catch (error) {
             console.warn("Habit Button: unable to read template", error);
           }
+        } else {
+          console.warn("Habit Button: unable to read template", options.templatePath);
         }
       }
 
