@@ -6,7 +6,22 @@ export type MarkdownPostProcessor = (
   ctx: MarkdownPostProcessorContext,
 ) => void | Promise<any>;
 
-export interface MarkdownPostProcessorContext {}
+export class MarkdownRenderChild {
+  containerEl: HTMLElement;
+
+  constructor(containerEl: HTMLElement) {
+    this.containerEl = containerEl;
+  }
+
+  onload(): void {}
+
+  onunload(): void {}
+}
+
+export interface MarkdownPostProcessorContext {
+  sourcePath?: string;
+  addChild?(child: MarkdownRenderChild): void;
+}
 
 export class App {
   vault: any;

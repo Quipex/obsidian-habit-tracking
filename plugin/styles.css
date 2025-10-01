@@ -160,3 +160,52 @@
 .dv-habit-card li::marker {
   content: "" !important;
 }
+
+.dv-habit-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 16px;
+}
+
+.dv-habit-group-title {
+  font-weight: 600;
+  font-size: 1.1em;
+}
+
+.dv-habit-group-summary {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #059669;
+}
+
+.dv-habit-group-caption {
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.dv-habit-group-empty {
+  color: var(--text-muted);
+}
+
+.dv-habit-group-duplicates {
+  color: #b45309;
+}
+
+.dv-habit-group-duplicates ul {
+  margin: 8px 0 0;
+  padding-left: 16px;
+}
+
+.dv-habit-group-duplicates li {
+  margin: 4px 0;
+}
+
+.dv-habit-group-link {
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}

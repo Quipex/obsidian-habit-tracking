@@ -326,3 +326,18 @@ export async function collectHabitStats(
     warningWindowHours: warningWindow,
   };
 }
+
+export function cloneHabitStats(stats: HabitStats): HabitStats {
+  return {
+    countsByISO: new Map(stats.countsByISO),
+    hasByISO: new Set(stats.hasByISO),
+    lastTsByISO: new Map(
+      Array.from(stats.lastTsByISO.entries()).map(([iso, date]) => [iso, new Date(date)]),
+    ),
+    lastTs: stats.lastTs ? new Date(stats.lastTs) : null,
+    streak: stats.streak,
+    allowedGapH: stats.allowedGapH,
+    allowedGapMs: stats.allowedGapMs,
+    warningWindowHours: stats.warningWindowHours,
+  };
+}

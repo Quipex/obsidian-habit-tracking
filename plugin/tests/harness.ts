@@ -3,6 +3,7 @@ import {
   Command,
   MarkdownPostProcessor,
   MarkdownPostProcessorContext,
+  MarkdownRenderChild,
   PluginManifest,
   TFile,
 } from "obsidian";
@@ -135,9 +136,27 @@ export async function renderHabitBlock(
   source: string,
   ctx: Partial<MarkdownPostProcessorContext> = {},
 ): Promise<HTMLElement> {
-  const processor = getCodeBlockProcessor(plugin);
+  return renderBlock(plugin, "habit-button", source, ctx);
+}
+
+export async function renderBlock(
+  plugin: PluginHarness,
+  language: string,
+  source: string,
+  ctx: Partial<MarkdownPostProcessorContext> = {},
+): Promise<HTMLElement> {
+  const processor = getCodeBlockProcessor(plugin, language);
   const container = document.createElement("div");
-  await processor(source, container, ctx as MarkdownPostProcessorContext);
+  const mergedCtx: MarkdownPostProcessorContext = {
+    sourcePath: ctx.sourcePath ?? "vault/mock.md",
+    addChild: ctx.addChild
+      ? ctx.addChild
+      : (child: MarkdownRenderChild) => {
+          child.onload?.();
+        },
+  };
+  Object.assign(mergedCtx, ctx);
+  await processor(source, container, mergedCtx);
   return container;
 }
 export function getTodayPath(folder: string): string {
