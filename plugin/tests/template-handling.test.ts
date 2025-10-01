@@ -35,7 +35,9 @@ describe("template handling", () => {
 
   it("warns when template missing but still logs entry", async () => {
     // given
-    const warnSpy = vi.spyOn(console, "warn");
+    const warnSpy = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => {});
     const plugin = await bootstrapPlugin({ templatePath: "templates/missing.md" });
     const habitDefinition = buildHabitDefinition({ title: "Missing Template" });
     const container = await renderHabit(plugin, habitDefinition);
