@@ -198,28 +198,38 @@
 }
 
 .dv-habit-group-summary {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "aggregate bar"
+    "aggregate label";
+  gap: 4px 12px;
   align-items: center;
-  gap: 12px;
 }
 
 .dv-habit-group-summary-label {
+  grid-area: aggregate;
+  align-self: center;
   font-size: 1.4em;
   font-weight: 700;
   color: #059669;
 }
 
 .dv-habit-group-caption {
+  grid-area: label;
   color: var(--text-muted);
   font-size: 0.9em;
+  text-align: right;
 }
 
 .dv-habit-group-progress {
+  grid-area: bar;
   height: 6px;
   border-radius: 999px;
   background: var(--background-modifier-border);
   overflow: hidden;
-  flex: 1;
+  min-width: 120px;
 }
 
 .dv-habit-group-progress-bar {

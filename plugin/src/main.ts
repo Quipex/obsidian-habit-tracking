@@ -688,12 +688,12 @@ export default class HabitButtonPlugin extends Plugin {
     const ratio = total > 0 ? Math.min(1, Math.max(0, active / total)) : 0;
     const percentage = Math.round(ratio * 100);
 
-    const label = summary.createDiv({ cls: "dv-habit-group-summary-label", text: `${active}/${total}` });
-    summary.createDiv({ cls: "dv-habit-group-caption", text: t("group.summaryCaption") });
+    summary.createDiv({ cls: "dv-habit-group-summary-label", text: `${active}/${total}` });
 
     const progress = summary.createDiv({ cls: "dv-habit-group-progress" });
     const bar = progress.createDiv({ cls: "dv-habit-group-progress-bar" });
     bar.style.width = `${percentage}%`;
+    summary.createDiv({ cls: "dv-habit-group-caption", text: t("group.summaryCaption") });
   }
 
   private renderGroupDuplicates(
