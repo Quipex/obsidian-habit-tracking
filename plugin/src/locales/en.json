@@ -11,6 +11,8 @@
   "settings.dailyFolder.desc": "Folder that contains daily notes to scan for habits.",
   "settings.templatePath.label": "Daily note template",
   "settings.templatePath.desc": "Optional template used when creating a missing daily note.",
+  "settings.border.label": "Show card borders",
+  "settings.border.desc": "Disable to render habit cards and groups without padding/border.",
   "settings.dimensions.heading": "Heatmap dimensions",
   "settings.dimensions.cellSize.label": "Cell size",
   "settings.dimensions.cellSize.desc": "Pixel size of heatmap cells.",

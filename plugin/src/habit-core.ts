@@ -18,6 +18,7 @@ export interface HabitBlockOptions {
   dotSize?: number;
   dotGap?: number;
   templatePath?: string;
+  border?: boolean;
 }
 
 export interface ResolvedHabitOptions {
@@ -39,6 +40,7 @@ export interface ResolvedHabitOptions {
   habitKey: string;
   habitTag: string;
   tagPrefix: string;
+  border: boolean;
 }
 
 export interface HabitStats {
@@ -193,6 +195,7 @@ export function resolveHabitOptions(
     : defaultWarningWindow;
 
   const group = raw.group ? normalizeWhitespace(String(raw.group)) : undefined;
+  const border = typeof raw.border === "boolean" ? raw.border : true;
 
   return {
     title,
@@ -213,6 +216,7 @@ export function resolveHabitOptions(
     habitKey,
     tagPrefix,
     habitTag: `#${tagPrefix}_${habitKey}`,
+    border,
   };
 }
 

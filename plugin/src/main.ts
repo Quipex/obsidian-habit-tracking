@@ -58,6 +58,7 @@ interface HabitGroupBlockOptions {
   group?: string;
   habitsLocations?: string[];
   eagerScan?: boolean;
+  border?: boolean;
 }
 
 export default class HabitButtonPlugin extends Plugin {
@@ -265,6 +266,10 @@ export default class HabitButtonPlugin extends Plugin {
       return;
     }
 
+    const effectiveBorder =
+      typeof blockOptions.border === "boolean" ? blockOptions.border : this.settings.defaultBorder;
+    options.border = effectiveBorder;
+
     const sourcePath = this.resolveSourcePath(ctx?.sourcePath);
     this.registerBlockCleanup(el, ctx, options.habitKey, sourcePath);
 
@@ -291,6 +296,8 @@ export default class HabitButtonPlugin extends Plugin {
 
     el.empty();
     const card = el.createDiv({ cls: "dv-habit-card" });
+    card.classList.toggle("has-border", options.border !== false);
+    card.classList.toggle("is-borderless", options.border === false);
     const iconBtn = card.createEl("button", {
       cls: "dv-habit-iconbtn",
       text: options.icon || "✅",
@@ -441,6 +448,7 @@ export default class HabitButtonPlugin extends Plugin {
         group: typeof data.group === "string" ? data.group : undefined,
         habitsLocations: toStringArray((data as any).habitsLocations),
         eagerScan: typeof data.eagerScan === "boolean" ? data.eagerScan : undefined,
+        border: typeof (data as any).border === "boolean" ? (data as any).border : undefined,
       };
     } catch (error) {
       console.warn("Habit Group: failed to parse block", error);
@@ -466,6 +474,10 @@ export default class HabitButtonPlugin extends Plugin {
 
     el.empty();
     const container = el.createDiv({ cls: "dv-habit-group" });
+    const borderEnabled =
+      typeof rawOptions.border === "boolean" ? rawOptions.border : this.settings.defaultBorder;
+    container.classList.toggle("has-border", borderEnabled);
+    container.classList.toggle("is-borderless", !borderEnabled);
 
     const render = async () => {
       container.empty();

@@ -11,6 +11,8 @@
   "settings.dailyFolder.desc": "Папка, в которой искать ежедневные заметки.",
   "settings.templatePath.label": "Шаблон ежедневника",
   "settings.templatePath.desc": "Необязательный шаблон для создаваемой заметки.",
+  "settings.border.label": "Показывать рамку",
+  "settings.border.desc": "Отключите, чтобы карточки и группы отображались без отступов и рамок.",
   "settings.dimensions.heading": "Габариты теплокарты",
   "settings.dimensions.cellSize.label": "Размер ячейки",
   "settings.dimensions.cellSize.desc": "Ширина и высота ячеек в пикселях.",

@@ -258,6 +258,42 @@ export class Setting {
     cb(slider);
     return this;
   }
+
+  addToggle(cb: (toggle: ToggleComponent) => void): this {
+    const toggle = new ToggleComponent(this.containerEl);
+    cb(toggle);
+    return this;
+  }
+}
+
+export class ToggleComponent {
+  toggleEl: HTMLInputElement;
+  private value = false;
+  private onChangeHandlers: ChangeHandler<boolean>[] = [];
+
+  constructor(container?: HTMLElement) {
+    this.toggleEl = document.createElement("input");
+    this.toggleEl.type = "checkbox";
+    if (container) container.appendChild(this.toggleEl);
+    this.toggleEl.addEventListener("change", async () => {
+      const checked = this.toggleEl.checked;
+      this.value = checked;
+      for (const handler of this.onChangeHandlers) {
+        await handler(checked);
+      }
+    });
+  }
+
+  setValue(value: boolean): this {
+    this.value = value;
+    this.toggleEl.checked = value;
+    return this;
+  }
+
+  onChange(handler: ChangeHandler<boolean>): this {
+    this.onChangeHandlers.push(handler);
+    return this;
+  }
 }
 
 export function setIcon(_el: HTMLElement, _icon: string): void {}

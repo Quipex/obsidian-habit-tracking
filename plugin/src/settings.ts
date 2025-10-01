@@ -18,6 +18,7 @@ export interface HabitButtonSettings {
   defaultGracePeriodHours: number;
   defaultWarningWindowHours: number;
   weekStart: "monday" | "sunday";
+  defaultBorder: boolean;
 }
 
 export const DEFAULT_SETTINGS: HabitButtonSettings = {
@@ -35,6 +36,7 @@ export const DEFAULT_SETTINGS: HabitButtonSettings = {
   defaultGracePeriodHours: 24,
   defaultWarningWindowHours: 24,
   weekStart: "monday",
+  defaultBorder: true,
 };
 
 export class HabitButtonSettingTab extends PluginSettingTab {
@@ -185,6 +187,18 @@ export class HabitButtonSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.templatePath)
           .onChange(async (value: string) => {
             this.plugin.settings.templatePath = value.trim();
+            await this.plugin.saveSettings();
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName(t("settings.border.label"))
+      .setDesc(t("settings.border.desc"))
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.defaultBorder)
+          .onChange(async (value) => {
+            this.plugin.settings.defaultBorder = value;
             await this.plugin.saveSettings();
           }),
       );

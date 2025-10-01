@@ -46,6 +46,7 @@ function fingerprintEntry(entry: HabitRegistryUpsertInput): string {
     templatePath: options.templatePath ?? null,
     icon: options.icon ?? null,
     tagPrefix: options.tagPrefix,
+    border: options.border,
   };
 
   const statsShape = {

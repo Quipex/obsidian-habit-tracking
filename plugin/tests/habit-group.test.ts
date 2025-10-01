@@ -92,4 +92,37 @@ describe("habit-group block", () => {
     const warning = groupContainer.querySelector<HTMLDivElement>(".dv-habit-group-duplicates");
     expect(warning?.textContent).toContain("Найдены дублирующиеся привычки");
   });
+
+  it("supports borderless group layout", async () => {
+    const plugin = await bootstrapPlugin();
+    const habitDefinition = buildHabitDefinition({
+      title: "Focus",
+      extraLines: ["group: squads"],
+    });
+    await renderHabit(plugin, habitDefinition);
+
+    const groupBlock = [
+      "group: squads",
+      "border: false",
+    ].join("\n");
+
+    const groupContainer = await renderBlock(plugin, "habit-group", groupBlock);
+    const panel = groupContainer.querySelector<HTMLDivElement>(".dv-habit-group");
+    expect(panel?.classList.contains("is-borderless")).toBe(true);
+    expect(panel?.classList.contains("has-border")).toBe(false);
+  });
+
+  it("uses global border preference when block omits override", async () => {
+    const plugin = await bootstrapPlugin({ defaultBorder: false });
+    const habitDefinition = buildHabitDefinition({
+      title: "Focus",
+      extraLines: ["group: squads"],
+    });
+    await renderHabit(plugin, habitDefinition);
+
+    const groupBlock = ["group: squads"].join("\n");
+    const groupContainer = await renderBlock(plugin, "habit-group", groupBlock);
+    const panel = groupContainer.querySelector<HTMLDivElement>(".dv-habit-group");
+    expect(panel?.classList.contains("is-borderless")).toBe(true);
+  });
 });
