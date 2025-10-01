@@ -198,6 +198,12 @@
 }
 
 .dv-habit-group-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dv-habit-group-summary-label {
   font-size: 1.4em;
   font-weight: 700;
   color: #059669;
@@ -213,6 +219,7 @@
   border-radius: 999px;
   background: var(--background-modifier-border);
   overflow: hidden;
+  flex: 1;
 }
 
 .dv-habit-group-progress-bar {

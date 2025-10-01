@@ -28,16 +28,16 @@ describe("habit-group block", () => {
 
     const groupBlock = ["title: Squad Overview", "group: squads"].join("\n");
     const groupContainer = await renderBlock(plugin, "habit-group", groupBlock);
-    const getSummary = () =>
-      groupContainer.querySelector<HTMLDivElement>(".dv-habit-group-summary");
-    expect(getSummary()?.textContent).toBe("0/1");
+    const getSummaryLabel = () =>
+      groupContainer.querySelector<HTMLDivElement>(".dv-habit-group-summary-label");
+    expect(getSummaryLabel()?.textContent).toBe("0/1");
 
     button!.click();
     await flushPromises();
 
     // allow group to rerender
     await flushPromises();
-    expect(getSummary()?.textContent).toBe("1/1");
+    expect(getSummaryLabel()?.textContent).toBe("1/1");
   });
 
   it("scans configured locations when registry is empty", async () => {
@@ -65,8 +65,8 @@ describe("habit-group block", () => {
     await flushPromises();
     const records = plugin.getHabitRegistry().getByGroup("squads");
     expect(records.length).toBe(1);
-    const summary = groupContainer.querySelector<HTMLDivElement>(".dv-habit-group-summary");
-    expect(summary?.textContent).toBe("1/1");
+    const summaryLabel = groupContainer.querySelector<HTMLDivElement>(".dv-habit-group-summary-label");
+    expect(summaryLabel?.textContent).toBe("1/1");
   });
 
   it("shows duplicates warning when multiple declarations found", async () => {

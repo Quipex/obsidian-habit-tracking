@@ -685,12 +685,14 @@ export default class HabitButtonPlugin extends Plugin {
 
   private renderGroupSummary(container: HTMLElement, active: number, total: number): void {
     const summary = container.createDiv({ cls: "dv-habit-group-summary" });
-    summary.textContent = `${active}/${total}`;
-    container.createDiv({ cls: "dv-habit-group-caption", text: t("group.summaryCaption") });
-    const progress = container.createDiv({ cls: "dv-habit-group-progress" });
-    const bar = progress.createDiv({ cls: "dv-habit-group-progress-bar" });
     const ratio = total > 0 ? Math.min(1, Math.max(0, active / total)) : 0;
     const percentage = Math.round(ratio * 100);
+
+    const label = summary.createDiv({ cls: "dv-habit-group-summary-label", text: `${active}/${total}` });
+    summary.createDiv({ cls: "dv-habit-group-caption", text: t("group.summaryCaption") });
+
+    const progress = summary.createDiv({ cls: "dv-habit-group-progress" });
+    const bar = progress.createDiv({ cls: "dv-habit-group-progress-bar" });
     bar.style.width = `${percentage}%`;
   }
 
