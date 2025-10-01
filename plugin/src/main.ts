@@ -198,10 +198,11 @@ export default class HabitButtonPlugin extends Plugin {
       name: t("commands.insertBlock"),
       editorCallback: (editor: Editor) => {
         const cursor = editor.getCursor();
+        const defaultLayout = this.settings.defaultLayout || DEFAULT_SETTINGS.defaultLayout;
         const snippet = [
           "```habit-button",
           `title: ${t("snippet.title")}`,
-          "heatLayout: grid",
+          `heatLayout: ${defaultLayout}`,
           t("snippet.heatLayoutComment"),
           "```",
           "",
