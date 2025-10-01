@@ -44,8 +44,8 @@
    - [x] Добавление к существующей заметке сохраняет перевод строки (`ensureTrailingNewline`).
 
 7. **error-paths.test.ts**
-   - [ ] Некорректный YAML → `renderError` без развешенных обработчиков.
-   - [ ] Ошибка сохранения (`vault.append` выбрасывает) приводит к уведомлению `ui.noticeError`.
+   - [x] Некорректный YAML → `renderError` без развешенных обработчиков.
+   - [x] Ошибка сохранения (`vault.append` выбрасывает) приводит к уведомлению `ui.noticeError`.
 
 8. **locale-refresh.test.ts**
    - [ ] Язык `ru` переключает локаль через `applyLocale`.

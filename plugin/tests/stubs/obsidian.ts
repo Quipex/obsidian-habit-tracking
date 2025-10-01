@@ -246,10 +246,12 @@ export function setIcon(_el: HTMLElement, _icon: string): void {}
 export class Notice {
   message: string;
   timeout?: number;
+  static all: Notice[] = [];
 
   constructor(message: string, timeout?: number) {
     this.message = message;
     this.timeout = timeout;
+    (this.constructor as typeof Notice).all.push(this);
   }
 }
 
