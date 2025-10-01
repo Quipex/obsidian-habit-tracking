@@ -211,7 +211,8 @@
 .dv-habit-group-summary-label {
   grid-area: aggregate;
   align-self: center;
-  font-size: 1.4em;
+  font-size: 2.5em;
+  line-height: 0.8;
   font-weight: 700;
   color: #059669;
 }
@@ -220,7 +221,7 @@
   grid-area: label;
   color: var(--text-muted);
   font-size: 0.9em;
-  text-align: right;
+  text-align: left;
 }
 
 .dv-habit-group-progress {
