@@ -90,7 +90,7 @@ describe("habit-group block", () => {
     const groupContainer = await renderBlock(plugin, "habit-group", groupBlock);
     await flushPromises();
     const warning = groupContainer.querySelector<HTMLDivElement>(".dv-habit-group-duplicates");
-    expect(warning?.textContent).toContain("Найдены дублирующиеся привычки");
+    expect(warning?.textContent).toContain("Duplicate habits found:");
   });
 
   it("supports borderless group layout", async () => {

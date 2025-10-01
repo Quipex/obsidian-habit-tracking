@@ -464,7 +464,7 @@ export default class HabitButtonPlugin extends Plugin {
     const rawOptions = this.parseHabitGroupBlock(source);
     const groupRaw = rawOptions.group?.trim();
     if (!groupRaw) {
-      this.renderError(el, "[habit-group] group is required");
+      this.renderError(el, t("ui.errorGroupMissing"));
       return;
     }
 
@@ -507,8 +507,8 @@ export default class HabitButtonPlugin extends Plugin {
 
       if (records.length === 0) {
         const message = rawOptions.eagerScan
-          ? "Привычки для этой группы не найдены."
-          : "Нет данных — откройте заметку с habit-button, входящими в группу.";
+          ? t("group.emptyEager")
+          : t("group.emptyPassive");
         container.createDiv({ cls: "dv-habit-group-empty", text: message });
         return;
       }
@@ -685,7 +685,7 @@ export default class HabitButtonPlugin extends Plugin {
   private renderGroupSummary(container: HTMLElement, active: number, total: number): void {
     const summary = container.createDiv({ cls: "dv-habit-group-summary" });
     summary.textContent = `${active}/${total}`;
-    container.createDiv({ cls: "dv-habit-group-caption", text: "активных привычек" });
+    container.createDiv({ cls: "dv-habit-group-caption", text: t("group.summaryCaption") });
   }
 
   private renderGroupDuplicates(
@@ -694,7 +694,7 @@ export default class HabitButtonPlugin extends Plugin {
     sourcePath: string,
   ): void {
     const warning = container.createDiv({ cls: "dv-habit-group-duplicates" });
-    warning.createDiv({ text: "Найдены дублирующиеся привычки:" });
+    warning.createDiv({ text: t("group.duplicatesHeading") });
     const list = warning.createEl("ul");
     for (const duplicate of duplicates) {
       const item = list.createEl("li");
