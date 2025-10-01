@@ -208,6 +208,20 @@
   font-size: 0.9em;
 }
 
+.dv-habit-group-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--background-modifier-border);
+  overflow: hidden;
+}
+
+.dv-habit-group-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #059669;
+  transition: width 0.2s ease;
+}
+
 .dv-habit-group-empty {
   color: var(--text-muted);
 }

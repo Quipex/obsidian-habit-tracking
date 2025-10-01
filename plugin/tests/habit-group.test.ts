@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { bootstrapPlugin, renderHabitBlock, renderBlock, flushPromises } from "./harness";
 import { buildHabitDefinition, renderHabit } from "./utils/habit-block";
+import { seedHabitEntries } from "./utils/habit-fixtures";
 
 const NOW = new Date("2024-06-15T10:00:00Z");
 
@@ -126,5 +127,41 @@ describe("habit-group block", () => {
     const groupContainer = await renderBlock(plugin, "habit-group", groupBlock);
     const panel = groupContainer.querySelector<HTMLDivElement>(".dv-habit-group");
     expect(panel?.classList.contains("is-borderless")).toBe(true);
+  });
+
+  it("updates progress bar according to aggregate", async () => {
+    const plugin = await bootstrapPlugin();
+    const habitDefinitionA = buildHabitDefinition({
+      title: "Progress A",
+      extraLines: ["group: squads"],
+    });
+    const habitDefinitionB = buildHabitDefinition({
+      title: "Progress B",
+      extraLines: ["group: squads"],
+    });
+
+    await renderHabit(plugin, habitDefinitionA);
+    await renderHabit(plugin, habitDefinitionB);
+
+    const groupBlock = ["group: squads"].join("\n");
+
+    const initial = await renderBlock(plugin, "habit-group", groupBlock);
+    await flushPromises();
+    const barInitial = initial.querySelector<HTMLDivElement>(".dv-habit-group-progress-bar");
+    expect(barInitial?.style.width).toBe("0%");
+
+    seedHabitEntries(plugin, "progress_a", [{ hoursAgo: 1 }], NOW);
+    await renderHabit(plugin, habitDefinitionA);
+    const half = await renderBlock(plugin, "habit-group", groupBlock);
+    await flushPromises();
+    const barHalf = half.querySelector<HTMLDivElement>(".dv-habit-group-progress-bar");
+    expect(barHalf?.style.width).toBe("50%");
+
+    seedHabitEntries(plugin, "progress_b", [{ hoursAgo: 1 }], NOW);
+    await renderHabit(plugin, habitDefinitionB);
+    const full = await renderBlock(plugin, "habit-group", groupBlock);
+    await flushPromises();
+    const barFull = full.querySelector<HTMLDivElement>(".dv-habit-group-progress-bar");
+    expect(barFull?.style.width).toBe("100%");
   });
 });
