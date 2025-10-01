@@ -347,10 +347,11 @@ export default class HabitButtonPlugin extends Plugin {
         : Infinity;
       const isStreakBroken = hasLastMark && !isStreakAlive;
       const warnWindow = currentStats.warningWindowHours;
-      const shouldWarn =
-        (isStreakAlive && remainingHours > 0 && remainingHours <= warnWindow) ||
-        (isStreakBroken && Number.isFinite(hoursSinceLast));
-      lastElement.classList.toggle("is-overdue", shouldWarn);
+      const hasFiniteRemaining = Number.isFinite(remainingHours);
+      const withinWarningWindow = hasFiniteRemaining && remainingHours > 0 && remainingHours <= warnWindow;
+      const pastAllowedGap = hasFiniteRemaining && remainingHours <= 0;
+      const shouldMarkOverdue = pastAllowedGap || (isStreakBroken && Number.isFinite(hoursSinceLast));
+      lastElement.classList.toggle("is-overdue", shouldMarkOverdue);
 
       const streakText =
         currentStats.streak > 0
@@ -360,7 +361,7 @@ export default class HabitButtonPlugin extends Plugin {
       streakElement.classList.toggle("is-zero", currentStats.streak === 0);
 
       const remH = remainingHours;
-      if (currentStats.streak > 0 && remH > 0 && remH <= warnWindow) {
+      if (currentStats.streak > 0 && withinWarningWindow) {
         const hint = streakElement.createSpan({ cls: "time-left" });
         const hrs = Math.ceil(remH);
         hint.textContent = ` ${t("overdue.label", hrs)}`;

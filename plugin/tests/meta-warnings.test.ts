@@ -42,7 +42,7 @@ describe("Habit meta warnings", () => {
   });
 
   describe("gracePeriodHours specified", () => {
-    it("activates warning when less than a day remains", async () => {
+    it("shows time left warning when less than a day remains", async () => {
       // given
       const plugin = await bootstrapPlugin();
       seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 30 }], NOW);
@@ -53,7 +53,7 @@ describe("Habit meta warnings", () => {
       const { card, last, streak, button, timeLeft } = getHabitMetaElements(container);
 
       // then
-      expect(last.classList.contains("is-overdue")).toBe(true);
+      expect(last.classList.contains("is-overdue")).toBe(false);
       expect(last.textContent).toBe("30h ago");
       expect(streak.textContent?.startsWith("Streak: 1 days")).toBe(true);
       expect(streak.classList.contains("is-zero")).toBe(false);
@@ -127,7 +127,7 @@ describe("Habit meta warnings", () => {
 
       // then
       expect(timeLeft?.textContent).toBe(" <4h 🔥");
-      expect(last.classList.contains("is-overdue")).toBe(true);
+      expect(last.classList.contains("is-overdue")).toBe(false);
     });
   });
 
@@ -146,7 +146,7 @@ describe("Habit meta warnings", () => {
       const { last, streak, timeLeft } = getHabitMetaElements(container);
 
       // then
-      expect(last.classList.contains("is-overdue")).toBe(true);
+      expect(last.classList.contains("is-overdue")).toBe(false);
       expect(timeLeft?.textContent).toBe(" <4h 🔥");
       expect(streak.classList.contains("is-zero")).toBe(false);
     });
@@ -168,7 +168,7 @@ describe("Habit meta warnings", () => {
       const { last, streak, timeLeft } = getHabitMetaElements(container);
 
       // then
-      expect(last.classList.contains("is-overdue")).toBe(true);
+      expect(last.classList.contains("is-overdue")).toBe(false);
       expect(timeLeft?.textContent).toBe(" <1h 🔥");
       expect(streak.classList.contains("is-zero")).toBe(false);
     });
@@ -186,7 +186,7 @@ describe("Habit meta warnings", () => {
       const { last, streak, timeLeft } = getHabitMetaElements(container);
 
       // then
-      expect(last.classList.contains("is-overdue")).toBe(true);
+      expect(last.classList.contains("is-overdue")).toBe(false);
       expect(streak.classList.contains("is-zero")).toBe(false);
       expect(timeLeft).not.toBeNull();
       expect(timeLeft?.textContent).toBe(" <18h 🔥");
