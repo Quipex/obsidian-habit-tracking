@@ -177,6 +177,7 @@
 .dv-habit-group {
   --emerald: #059669;
   --amber: #b45309;
+  --gray: var(--background-modifier-border);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -218,7 +219,19 @@
   font-size: 2.3em;
   line-height: 0.8;
   font-weight: 700;
+  color: var(--text-muted);
+}
+
+.dv-habit-group-summary-label.is-emerald {
   color: var(--emerald);
+}
+
+.dv-habit-group-summary-label.is-amber {
+  color: var(--amber);
+}
+
+.dv-habit-group-summary-label.is-empty {
+  color: var(--text-muted);
 }
 
 .dv-habit-group-caption {
@@ -235,13 +248,29 @@
   background: var(--background-modifier-border);
   overflow: hidden;
   min-width: 120px;
+  display: flex;
 }
 
-.dv-habit-group-progress-bar {
+.dv-habit-group-progress.is-empty {
+  background: var(--background-modifier-border);
+}
+
+.dv-habit-group-segment {
+  flex: 1;
   height: 100%;
-  width: 0%;
-  background: #059669;
-  transition: width 0.2s ease;
+  transition: background 0.2s ease;
+}
+
+.dv-habit-group-segment.is-emerald {
+  background: var(--emerald);
+}
+
+.dv-habit-group-segment.is-amber {
+  background: var(--amber);
+}
+
+.dv-habit-group-segment.is-gray {
+  background: var(--gray);
 }
 
 .dv-habit-group-empty {

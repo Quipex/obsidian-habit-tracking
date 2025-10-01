@@ -129,7 +129,7 @@ describe("habit-group block", () => {
     expect(panel?.classList.contains("is-borderless")).toBe(true);
   });
 
-  it("updates progress bar according to aggregate", async () => {
+  it("renders colored progress segments and aggregate tint", async () => {
     const plugin = await bootstrapPlugin();
     const habitDefinitionA = buildHabitDefinition({
       title: "Progress A",
@@ -145,23 +145,86 @@ describe("habit-group block", () => {
 
     const groupBlock = ["group: squads"].join("\n");
 
-    const initial = await renderBlock(plugin, "habit-group", groupBlock);
-    await flushPromises();
-    const barInitial = initial.querySelector<HTMLDivElement>(".dv-habit-group-progress-bar");
-    expect(barInitial?.style.width).toBe("0%");
+    const renderGroup = async () => {
+      const container = await renderBlock(plugin, "habit-group", groupBlock);
+      await flushPromises();
+      return container;
+    };
+
+    const readSegmentStates = (container: HTMLElement): string[] => {
+      const segments = Array.from(
+        container.querySelectorAll<HTMLDivElement>(".dv-habit-group-segment"),
+      );
+      return segments.map((segment) => {
+        if (segment.classList.contains("is-emerald")) return "emerald";
+        if (segment.classList.contains("is-amber")) return "amber";
+        return "gray";
+      });
+    };
+
+    const readLabel = (container: HTMLElement) =>
+      container.querySelector<HTMLDivElement>(".dv-habit-group-summary-label");
+
+    const initial = await renderGroup();
+    expect(readSegmentStates(initial)).toEqual(["gray", "gray"]);
+    const initialLabel = readLabel(initial);
+    expect(initialLabel?.textContent).toBe("0/2");
+    expect(initialLabel?.classList.contains("is-amber")).toBe(true);
 
     seedHabitEntries(plugin, "progress_a", [{ hoursAgo: 1 }], NOW);
     await renderHabit(plugin, habitDefinitionA);
-    const half = await renderBlock(plugin, "habit-group", groupBlock);
-    await flushPromises();
-    const barHalf = half.querySelector<HTMLDivElement>(".dv-habit-group-progress-bar");
-    expect(barHalf?.style.width).toBe("50%");
+    const mid = await renderGroup();
+    expect(readSegmentStates(mid)).toEqual(["emerald", "gray"]);
+    const midLabel = readLabel(mid);
+    expect(midLabel?.textContent).toBe("1/2");
+    expect(midLabel?.classList.contains("is-amber")).toBe(true);
 
     seedHabitEntries(plugin, "progress_b", [{ hoursAgo: 1 }], NOW);
     await renderHabit(plugin, habitDefinitionB);
-    const full = await renderBlock(plugin, "habit-group", groupBlock);
+    const full = await renderGroup();
+    expect(readSegmentStates(full)).toEqual(["emerald", "emerald"]);
+    const fullLabel = readLabel(full);
+    expect(fullLabel?.textContent).toBe("2/2");
+    expect(fullLabel?.classList.contains("is-emerald")).toBe(true);
+  });
+
+  it("orders segments by state priority", async () => {
+    const plugin = await bootstrapPlugin();
+    const healthyHabit = buildHabitDefinition({
+      title: "Healthy",
+      extraLines: ["group: squads"],
+    });
+    const warningHabit = buildHabitDefinition({
+      title: "Warning",
+      extraLines: ["group: squads"],
+    });
+    const staleHabit = buildHabitDefinition({
+      title: "Stale",
+      extraLines: ["group: squads"],
+    });
+
+    await renderHabit(plugin, healthyHabit);
+    await renderHabit(plugin, warningHabit);
+    await renderHabit(plugin, staleHabit);
+
+    seedHabitEntries(plugin, "healthy", [{ hoursAgo: 1 }], NOW);
+    await renderHabit(plugin, healthyHabit);
+
+    seedHabitEntries(plugin, "warning", [{ hoursAgo: 30 }], NOW);
+    await renderHabit(plugin, warningHabit);
+
+    const groupBlock = ["group: squads"].join("\n");
+    const container = await renderBlock(plugin, "habit-group", groupBlock);
     await flushPromises();
-    const barFull = full.querySelector<HTMLDivElement>(".dv-habit-group-progress-bar");
-    expect(barFull?.style.width).toBe("100%");
+
+    const segments = Array.from(
+      container.querySelectorAll<HTMLDivElement>(".dv-habit-group-segment"),
+    ).map((segment) => {
+      if (segment.classList.contains("is-emerald")) return "emerald";
+      if (segment.classList.contains("is-amber")) return "amber";
+      return "gray";
+    });
+
+    expect(segments).toEqual(["emerald", "amber", "gray"]);
   });
 });

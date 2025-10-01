@@ -62,6 +62,8 @@ interface HabitGroupBlockOptions {
   border?: boolean;
 }
 
+type GroupSegmentState = "emerald" | "amber" | "gray";
+
 export default class HabitButtonPlugin extends Plugin {
   settings: HabitButtonSettings = DEFAULT_SETTINGS;
   private styleEl: HTMLStyleElement | null = null;
@@ -515,9 +517,7 @@ export default class HabitButtonPlugin extends Plugin {
         return;
       }
 
-      const active = records.filter((record) => record.stats.streak > 0).length;
-      const total = records.length;
-      this.renderGroupSummary(container, active, total);
+      this.renderGroupSummary(container, records);
     };
 
     await render();
@@ -684,17 +684,61 @@ export default class HabitButtonPlugin extends Plugin {
     return duplicates;
   }
 
-  private renderGroupSummary(container: HTMLElement, active: number, total: number): void {
+  private renderGroupSummary(container: HTMLElement, records: HabitRegistryRecord[]): void {
     const summary = container.createDiv({ cls: "dv-habit-group-summary" });
-    const ratio = total > 0 ? Math.min(1, Math.max(0, active / total)) : 0;
-    const percentage = Math.round(ratio * 100);
+    const now = Date.now();
+    const byState = records.map((record) => ({
+      record,
+      state: this.classifyGroupHabit(record, now),
+      title: record.options.normalizedTitle?.toLowerCase() ?? record.habitKey.toLowerCase(),
+    }));
+    const priority: Record<GroupSegmentState, number> = { emerald: 0, amber: 1, gray: 2 };
+    byState.sort((a, b) => {
+      const order = priority[a.state] - priority[b.state];
+      if (order !== 0) return order;
+      return a.title.localeCompare(b.title);
+    });
 
-    summary.createDiv({ cls: "dv-habit-group-summary-label", text: `${active}/${total}` });
+    const total = byState.length;
+    const completed = byState.filter((entry) => entry.state === "emerald").length;
+    const label = summary.createDiv({
+      cls: "dv-habit-group-summary-label",
+      text: `${completed}/${total}`,
+    });
+    if (total === 0) label.classList.add("is-empty");
+    else if (completed === total) label.classList.add("is-emerald");
+    else label.classList.add("is-amber");
 
     const progress = summary.createDiv({ cls: "dv-habit-group-progress" });
-    const bar = progress.createDiv({ cls: "dv-habit-group-progress-bar" });
-    bar.style.width = `${percentage}%`;
+    if (total === 0) {
+      progress.classList.add("is-empty");
+    } else {
+      for (const entry of byState) {
+        progress.createDiv({
+          cls: `dv-habit-group-segment is-${entry.state}`,
+          attr: { title: entry.record.options.normalizedTitle ?? entry.record.habitKey },
+        });
+      }
+    }
     summary.createDiv({ cls: "dv-habit-group-caption", text: t("group.summaryCaption") });
+  }
+
+  private classifyGroupHabit(record: HabitRegistryRecord, now: number): GroupSegmentState {
+    const { stats } = record;
+    if (stats.streak <= 0 || !stats.lastTs) return "gray";
+
+    const hoursSinceLast = (now - stats.lastTs.getTime()) / 3600000;
+    if (!Number.isFinite(hoursSinceLast) || hoursSinceLast < 0) return "gray";
+
+    const remaining = stats.allowedGapH - hoursSinceLast;
+    if (!Number.isFinite(remaining) || remaining <= 0) return "gray";
+
+    const warnWindow = Math.max(0, stats.warningWindowHours);
+    if (warnWindow > 0 && remaining <= warnWindow) {
+      return "amber";
+    }
+
+    return "emerald";
   }
 
   private renderGroupDuplicates(
