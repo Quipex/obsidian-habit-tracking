@@ -11,9 +11,13 @@ export interface MarkdownPostProcessorContext {}
 export class App {
   vault: any;
   workspace: any;
+  locale?: string;
   constructor() {
-    this.vault = {};
+    this.vault = {
+      getConfig: (_key: string) => undefined,
+    };
     this.workspace = {};
+    this.locale = "en";
   }
 }
 
