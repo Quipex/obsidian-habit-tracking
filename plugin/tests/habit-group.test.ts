@@ -110,6 +110,8 @@ describe("habit-group block", () => {
     const panel = groupContainer.querySelector<HTMLDivElement>(".dv-habit-group");
     expect(panel?.classList.contains("is-borderless")).toBe(true);
     expect(panel?.classList.contains("has-border")).toBe(false);
+    const title = panel?.querySelector<HTMLDivElement>(".dv-habit-group-title");
+    expect(title?.textContent).toBe("Squads");
   });
 
   it("uses global border preference when block omits override", async () => {

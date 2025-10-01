@@ -28,6 +28,7 @@ import {
   today0,
   trimSlashes,
   cloneHabitStats,
+  capitalizeFirst,
 } from "./habit-core";
 import type { HabitStats, ResolvedHabitOptions } from "./habit-core";
 import HabitRegistry, { HabitRegistryRecord } from "./habit-registry";
@@ -468,7 +469,7 @@ export default class HabitButtonPlugin extends Plugin {
       return;
     }
 
-    const groupLabel = rawOptions.title?.trim() || groupRaw;
+    const groupLabel = rawOptions.title?.trim() || capitalizeFirst(groupRaw);
     const normalizedGroup = groupRaw.trim().toLowerCase();
     const sourcePath = this.resolveSourcePath(ctx?.sourcePath);
 
