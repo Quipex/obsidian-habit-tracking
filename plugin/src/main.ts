@@ -700,13 +700,13 @@ export default class HabitButtonPlugin extends Plugin {
     });
 
     const total = byState.length;
-    const completed = byState.filter((entry) => entry.state === "emerald").length;
+    const activeCount = byState.filter((entry) => entry.state !== "gray").length;
     const label = summary.createDiv({
       cls: "dv-habit-group-summary-label",
-      text: `${completed}/${total}`,
+      text: `${activeCount}/${total}`,
     });
     if (total === 0) label.classList.add("is-empty");
-    else if (completed === total) label.classList.add("is-emerald");
+    else if (activeCount === total) label.classList.add("is-emerald");
     else label.classList.add("is-amber");
 
     const progress = summary.createDiv({ cls: "dv-habit-group-progress" });

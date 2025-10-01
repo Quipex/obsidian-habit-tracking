@@ -227,4 +227,51 @@ describe("habit-group block", () => {
 
     expect(segments).toEqual(["emerald", "amber", "gray"]);
   });
+
+  it("counts warning streaks towards aggregate", async () => {
+    const plugin = await bootstrapPlugin();
+    const graceHabit = buildHabitDefinition({
+      title: "Graceful",
+      extraLines: ["group: squads"],
+    });
+    const warningHabit = buildHabitDefinition({
+      title: "Warning",
+      extraLines: ["group: squads"],
+    });
+    const staleHabit = buildHabitDefinition({
+      title: "Stale",
+      extraLines: ["group: squads"],
+    });
+
+    await renderHabit(plugin, graceHabit);
+    await renderHabit(plugin, warningHabit);
+    await renderHabit(plugin, staleHabit);
+
+    seedHabitEntries(plugin, "graceful", [{ hoursAgo: 10 }], NOW);
+    await renderHabit(plugin, graceHabit);
+
+    seedHabitEntries(plugin, "warning", [{ hoursAgo: 30 }], NOW);
+    await renderHabit(plugin, warningHabit);
+
+    seedHabitEntries(plugin, "stale", [{ hoursAgo: 60 }], NOW);
+    await renderHabit(plugin, staleHabit);
+
+    const groupBlock = ["group: squads"].join("\n");
+    const container = await renderBlock(plugin, "habit-group", groupBlock);
+    await flushPromises();
+
+    const label = container.querySelector<HTMLDivElement>(".dv-habit-group-summary-label");
+    expect(label?.textContent).toBe("2/3");
+    expect(label?.classList.contains("is-amber")).toBe(true);
+
+    const segments = Array.from(
+      container.querySelectorAll<HTMLDivElement>(".dv-habit-group-segment"),
+    ).map((segment) => {
+      if (segment.classList.contains("is-emerald")) return "emerald";
+      if (segment.classList.contains("is-amber")) return "amber";
+      return "gray";
+    });
+
+    expect(segments).toEqual(["emerald", "amber", "gray"]);
+  });
 });
