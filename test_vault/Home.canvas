@@ -7,7 +7,7 @@
 		{"id":"506dd280d2c9be10","type":"text","text":"```habit-button\ntitle: drink water\nicon: 🥤\ngracePeriodHours: 24\ngroup: health\n```","x":-2420,"y":-960,"width":600,"height":220},
 		{"id":"32047f5096e7e55f","type":"text","text":"```habit-group\ngroup: relationship\nicon: 💞\n```","x":-1640,"y":-1580,"width":360,"height":100},
 		{"id":"3e325f014f11d0c9","type":"text","text":"```habit-group\ngroup: health\nicon: 🦄\nhabitsLocations:\n  - home/habits/health\neagerScan: true\n```","x":-2420,"y":-1580,"width":370,"height":100},
-		{"id":"23789de785151f69","x":-2360,"y":-1780,"width":251,"height":114,"type":"text","text":"This group has 5 habits\n3 are on this page\nanother 2 are in other notes"}
+		{"id":"23789de785151f69","x":-2360,"y":-1820,"width":251,"height":114,"type":"text","text":"This group has 5 habits\n3 are on this page\nanother 2 are in other notes"}
 	],
 	"edges":[
 		{"id":"f39c654d984880c8","fromNode":"3e325f014f11d0c9","fromSide":"top","toNode":"23789de785151f69","toSide":"bottom"}

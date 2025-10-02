@@ -301,7 +301,14 @@
 }
 
 .dv-habit-group-segment.is-amber {
-  background: var(--amber);
+  background-color: var(--gray);
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--amber) 0px,
+    var(--amber) 6px,
+    transparent 6px,
+    transparent 12px
+  );
 }
 
 .dv-habit-group-segment.is-gray {
