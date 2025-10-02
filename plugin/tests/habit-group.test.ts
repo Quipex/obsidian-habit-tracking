@@ -139,14 +139,18 @@ describe("habit-group block", () => {
 
     const groupBlock = ["group: squads", "icon: ⚡"].join("\n");
     const groupContainer = await renderBlock(plugin, "habit-group", groupBlock);
-    const layout = groupContainer.querySelector<HTMLDivElement>(".dv-habit-group-layout.has-icon");
+    const layout = groupContainer.querySelector<HTMLDivElement>(".dv-habit-group-layout");
     const icon = layout?.querySelector<HTMLDivElement>(".dv-habit-group-icon");
     const title = layout?.querySelector<HTMLDivElement>(".dv-habit-group-title");
-    const status = layout?.querySelector<HTMLDivElement>(".dv-habit-group-status");
+    const aggregate = layout?.querySelector<HTMLDivElement>(".dv-habit-group-aggregate");
+    const bar = layout?.querySelector<HTMLDivElement>(".dv-habit-group-bar");
+    const caption = layout?.querySelector<HTMLDivElement>(".dv-habit-group-caption");
     expect(layout).not.toBeNull();
     expect(icon?.textContent).toBe("⚡");
     expect(title?.textContent).toBe("Squads");
-    expect(status?.querySelector(".dv-habit-group-summary-label")).not.toBeNull();
+    expect(aggregate?.querySelector(".dv-habit-group-summary-label")).not.toBeNull();
+    expect(bar?.querySelector(".dv-habit-group-progress")).not.toBeNull();
+    expect(caption?.textContent?.length).toBeGreaterThan(0);
   });
 
   it("renders colored progress segments and aggregate tint", async () => {

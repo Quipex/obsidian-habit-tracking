@@ -199,60 +199,48 @@
 
 .dv-habit-group-layout {
   display: grid;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto auto;
-  grid-template-areas:
-    "title"
-    "status";
-  column-gap: 30px;
-}
-
-.dv-habit-group-layout.has-icon {
-  grid-template-columns: 3em 1fr;
-  grid-template-rows: auto auto;
+  grid-template-columns: min-content 1fr;
+  grid-template-rows: min-content 1fr min-content min-content;
   grid-template-areas:
     "icon title"
-    "icon status";
+    "icon aggregate"
+    "icon bar"
+    "icon caption";
+  row-gap: 8px;
   align-items: center;
 }
 
 .dv-habit-group-icon {
   grid-area: icon;
-  font-size: 3.7em;
+  font-size: 4.5em;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  align-self: baseline;
+  margin-right: 16px;
 }
 
 .dv-habit-group-title {
   grid-area: title;
   font-weight: 600;
-  font-size: 1.1em;
+  font-size: 1.5em;
+  line-height: 1;
 }
 
-.dv-habit-group-status {
-  grid-area: status;
-}
-
-.dv-habit-group-summary {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto;
-  grid-template-areas:
-    "aggregate bar"
-    "aggregate label";
-  gap: 4px 12px;
-  align-items: center;
+.dv-habit-group-aggregate {
+  grid-area: aggregate;
+  display: flex;
+  align-items: flex-end;
 }
 
 .dv-habit-group-summary-label {
-  grid-area: aggregate;
-  align-self: center;
-  font-size: 3em;
-  line-height: 0.8;
-  font-weight: 700;
+  font-size: 2.6em;
+  line-height: 1;
+  font-weight: 600;
   color: var(--text-muted);
+  letter-spacing: 2px;
+  margin-bottom: 3px;
 }
 
 .dv-habit-group-summary-label.is-emerald {
@@ -267,18 +255,19 @@
   color: var(--text-muted);
 }
 
+.dv-habit-group-bar {
+  grid-area: bar;
+}
+
 .dv-habit-group-caption {
-  grid-area: label;
+  grid-area: caption;
   color: var(--text-muted);
-  font-size: 0.8em;
+  font-size: 0.9em;
   text-align: left;
-  line-height: 1;
 }
 
 .dv-habit-group-progress {
-  margin-top: 1em;
-  grid-area: bar;
-  height: 6px;
+  height: 9px;
   border-radius: 999px;
   background: var(--background-modifier-border);
   overflow: hidden;

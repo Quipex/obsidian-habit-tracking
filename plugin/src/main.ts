@@ -490,12 +490,13 @@ export default class HabitButtonPlugin extends Plugin {
       container.empty();
 
       const layout = container.createDiv({ cls: "dv-habit-group-layout" });
-      if (groupIcon) layout.classList.add("has-icon");
       if (groupIcon) {
         layout.createDiv({ cls: "dv-habit-group-icon", text: groupIcon });
       }
       layout.createDiv({ cls: "dv-habit-group-title", text: groupLabel });
-      const statusHost = layout.createDiv({ cls: "dv-habit-group-status" });
+      const aggregateHost = layout.createDiv({ cls: "dv-habit-group-aggregate" });
+      const barHost = layout.createDiv({ cls: "dv-habit-group-bar" });
+      const captionHost = layout.createDiv({ cls: "dv-habit-group-caption" });
 
       let records = this.registry.getByGroup(groupRaw);
       const needsScan = Boolean(rawOptions.eagerScan || records.length === 0);
@@ -527,7 +528,7 @@ export default class HabitButtonPlugin extends Plugin {
         return;
       }
 
-      this.renderGroupSummary(statusHost, records);
+      this.renderGroupSummary({ aggregate: aggregateHost, bar: barHost, caption: captionHost }, records);
     };
 
     await render();
@@ -694,8 +695,14 @@ export default class HabitButtonPlugin extends Plugin {
     return duplicates;
   }
 
-  private renderGroupSummary(container: HTMLElement, records: HabitRegistryRecord[]): void {
-    const summary = container.createDiv({ cls: "dv-habit-group-summary" });
+  private renderGroupSummary(
+    hosts: { aggregate: HTMLElement; bar: HTMLElement; caption: HTMLElement },
+    records: HabitRegistryRecord[],
+  ): void {
+    const { aggregate, bar, caption } = hosts;
+    aggregate.empty();
+    bar.empty();
+    caption.empty();
     const now = Date.now();
     const byState = records.map((record) => ({
       record,
@@ -711,7 +718,7 @@ export default class HabitButtonPlugin extends Plugin {
 
     const total = byState.length;
     const activeCount = byState.filter((entry) => entry.state !== "gray").length;
-    const label = summary.createDiv({
+    const label = aggregate.createDiv({
       cls: "dv-habit-group-summary-label",
       text: `${activeCount}/${total}`,
     });
@@ -719,7 +726,7 @@ export default class HabitButtonPlugin extends Plugin {
     else if (activeCount === total) label.classList.add("is-emerald");
     else label.classList.add("is-amber");
 
-    const progress = summary.createDiv({ cls: "dv-habit-group-progress" });
+    const progress = bar.createDiv({ cls: "dv-habit-group-progress" });
     if (total === 0) {
       progress.classList.add("is-empty");
     } else {
@@ -730,7 +737,7 @@ export default class HabitButtonPlugin extends Plugin {
         });
       }
     }
-    summary.createDiv({ cls: "dv-habit-group-caption", text: t("group.summaryCaption") });
+    caption.textContent = t("group.summaryCaption");
   }
 
   private classifyGroupHabit(record: HabitRegistryRecord, now: number): GroupSegmentState {
