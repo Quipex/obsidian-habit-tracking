@@ -129,6 +129,26 @@ describe("habit-group block", () => {
     expect(panel?.classList.contains("is-borderless")).toBe(true);
   });
 
+  it("renders icon when provided", async () => {
+    const plugin = await bootstrapPlugin();
+    const habitDefinition = buildHabitDefinition({
+      title: "Focus",
+      extraLines: ["group: squads"],
+    });
+    await renderHabit(plugin, habitDefinition);
+
+    const groupBlock = ["group: squads", "icon: ⚡"].join("\n");
+    const groupContainer = await renderBlock(plugin, "habit-group", groupBlock);
+    const layout = groupContainer.querySelector<HTMLDivElement>(".dv-habit-group-layout.has-icon");
+    const icon = layout?.querySelector<HTMLDivElement>(".dv-habit-group-icon");
+    const title = layout?.querySelector<HTMLDivElement>(".dv-habit-group-title");
+    const status = layout?.querySelector<HTMLDivElement>(".dv-habit-group-status");
+    expect(layout).not.toBeNull();
+    expect(icon?.textContent).toBe("⚡");
+    expect(title?.textContent).toBe("Squads");
+    expect(status?.querySelector(".dv-habit-group-summary-label")).not.toBeNull();
+  });
+
   it("renders colored progress segments and aggregate tint", async () => {
     const plugin = await bootstrapPlugin();
     const habitDefinitionA = buildHabitDefinition({

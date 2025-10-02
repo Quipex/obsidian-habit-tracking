@@ -197,9 +197,42 @@
   border: none;
 }
 
+.dv-habit-group-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "title"
+    "status";
+  column-gap: 30px;
+}
+
+.dv-habit-group-layout.has-icon {
+  grid-template-columns: 3em 1fr;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "icon title"
+    "icon status";
+  align-items: center;
+}
+
+.dv-habit-group-icon {
+  grid-area: icon;
+  font-size: 3.7em;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .dv-habit-group-title {
+  grid-area: title;
   font-weight: 600;
   font-size: 1.1em;
+}
+
+.dv-habit-group-status {
+  grid-area: status;
 }
 
 .dv-habit-group-summary {
@@ -216,7 +249,7 @@
 .dv-habit-group-summary-label {
   grid-area: aggregate;
   align-self: center;
-  font-size: 2.3em;
+  font-size: 3em;
   line-height: 0.8;
   font-weight: 700;
   color: var(--text-muted);
@@ -237,11 +270,13 @@
 .dv-habit-group-caption {
   grid-area: label;
   color: var(--text-muted);
-  font-size: 0.9em;
+  font-size: 0.8em;
   text-align: left;
+  line-height: 1;
 }
 
 .dv-habit-group-progress {
+  margin-top: 1em;
   grid-area: bar;
   height: 6px;
   border-radius: 999px;

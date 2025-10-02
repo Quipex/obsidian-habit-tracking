@@ -60,6 +60,7 @@ interface HabitGroupBlockOptions {
   habitsLocations?: string[];
   eagerScan?: boolean;
   border?: boolean;
+  icon?: string;
 }
 
 type GroupSegmentState = "emerald" | "amber" | "gray";
@@ -453,6 +454,7 @@ export default class HabitButtonPlugin extends Plugin {
         habitsLocations: toStringArray((data as any).habitsLocations),
         eagerScan: typeof data.eagerScan === "boolean" ? data.eagerScan : undefined,
         border: typeof (data as any).border === "boolean" ? (data as any).border : undefined,
+        icon: typeof (data as any).icon === "string" ? String((data as any).icon) : undefined,
       };
     } catch (error) {
       console.warn("Habit Group: failed to parse block", error);
@@ -473,6 +475,7 @@ export default class HabitButtonPlugin extends Plugin {
     }
 
     const groupLabel = rawOptions.title?.trim() || capitalizeFirst(groupRaw);
+    const groupIcon = rawOptions.icon?.trim();
     const normalizedGroup = groupRaw.trim().toLowerCase();
     const sourcePath = this.resolveSourcePath(ctx?.sourcePath);
 
@@ -485,7 +488,14 @@ export default class HabitButtonPlugin extends Plugin {
 
     const render = async () => {
       container.empty();
-      container.createDiv({ cls: "dv-habit-group-title", text: groupLabel });
+
+      const layout = container.createDiv({ cls: "dv-habit-group-layout" });
+      if (groupIcon) layout.classList.add("has-icon");
+      if (groupIcon) {
+        layout.createDiv({ cls: "dv-habit-group-icon", text: groupIcon });
+      }
+      layout.createDiv({ cls: "dv-habit-group-title", text: groupLabel });
+      const statusHost = layout.createDiv({ cls: "dv-habit-group-status" });
 
       let records = this.registry.getByGroup(groupRaw);
       const needsScan = Boolean(rawOptions.eagerScan || records.length === 0);
@@ -517,7 +527,7 @@ export default class HabitButtonPlugin extends Plugin {
         return;
       }
 
-      this.renderGroupSummary(container, records);
+      this.renderGroupSummary(statusHost, records);
     };
 
     await render();
