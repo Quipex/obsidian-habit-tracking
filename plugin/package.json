@@ -17,8 +17,5 @@
     "typescript": "^5.4.5",
     "vitest": "^3.2.4",
     "yaml": "^2.8.1"
-  },
-  "dependencies": {
-    "tiny-i18n": "^2.0.4"
   }
 }
