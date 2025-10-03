@@ -21,8 +21,8 @@ import {
   ensureTrailingNewline,
   isoOf,
   nowHHMM,
-  pad2,
   parseHabitBlock,
+  formatDailyNoteName,
   resolveHabitOptions,
   sortDatesAscending,
   today0,
@@ -866,10 +866,7 @@ export default class HabitButtonPlugin extends Plugin {
 
   private async logHabitEntry(options: ResolvedHabitOptions): Promise<Date | null> {
     const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = pad2(now.getMonth() + 1);
-    const dd = pad2(now.getDate());
-    const fileName = `${yyyy}-${mm}-${dd}.md`;
+    const fileName = `${formatDailyNoteName(now, options.dailyNoteFormat)}.md`;
     const folder = trimSlashes(options.dailyFolder);
     const path = folder ? `${folder}/${fileName}` : fileName;
 

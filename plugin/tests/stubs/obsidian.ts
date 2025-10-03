@@ -1,4 +1,5 @@
 import { parse as parseYamlLib } from "yaml";
+import moment from "moment";
 
 export type MarkdownPostProcessor = (
   source: string,
@@ -323,3 +324,5 @@ export interface Editor {
 export function parseYaml(value: string): any {
   return parseYamlLib(value) ?? {};
 }
+
+export { moment };

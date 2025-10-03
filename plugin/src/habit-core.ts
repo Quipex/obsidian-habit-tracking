@@ -1,6 +1,7 @@
-import { parseYaml } from "obsidian";
+import { parseYaml, moment } from "obsidian";
 import type { TFile } from "obsidian";
 import type { HabitButtonSettings } from "./settings";
+import { DEFAULT_DAILY_NOTE_FORMAT } from "./settings";
 
 export type HeatLayout = "grid" | "row";
 
@@ -29,6 +30,7 @@ export interface ResolvedHabitOptions {
   warningWindowHours: number;
   icon?: string;
   dailyFolder: string;
+  dailyNoteFormat: string;
   heatLayout: HeatLayout;
   weeks: number;
   days: number;
@@ -73,6 +75,24 @@ interface HabitDayParts {
   y: number;
   mo: number;
   d: number;
+}
+
+export function normalizeDailyNoteFormat(format: string | undefined, fallback?: string): string {
+  const candidate = (format ?? "").trim();
+  const fallbackCandidate = (fallback ?? DEFAULT_DAILY_NOTE_FORMAT).trim();
+  return candidate || fallbackCandidate || DEFAULT_DAILY_NOTE_FORMAT;
+}
+
+export function formatDailyNoteName(date: Date, format: string): string {
+  const pattern = normalizeDailyNoteFormat(format);
+  return moment(date).format(pattern);
+}
+
+export function parseDailyNoteName(name: string, format: string): HabitDayParts | null {
+  const pattern = normalizeDailyNoteFormat(format);
+  const parsed = moment(name, pattern, true);
+  if (!parsed.isValid()) return null;
+  return { y: parsed.year(), mo: parsed.month() + 1, d: parsed.date() };
 }
 
 export function pad2(n: number): string {
@@ -159,6 +179,7 @@ export function resolveHabitOptions(
 
   const settingsFolder = (settings.dailyFolder ?? defaults.dailyFolder).trim();
   const dailyFolder = settingsFolder ? trimSlashes(settingsFolder) : "";
+  const dailyNoteFormat = normalizeDailyNoteFormat(settings.dailyNoteFormat, defaults.dailyNoteFormat);
 
   const templateCandidate = (settings.templatePath ?? "").trim();
   const templatePath = templateCandidate ? templateCandidate : undefined;
@@ -205,6 +226,7 @@ export function resolveHabitOptions(
     gracePeriodHours,
     warningWindowHours,
     dailyFolder,
+    dailyNoteFormat,
     heatLayout: layout,
     weeks,
     days,
@@ -218,12 +240,6 @@ export function resolveHabitOptions(
     habitTag: `#${tagPrefix}_${habitKey}`,
     border,
   };
-}
-
-function parseYMD(name: string): HabitDayParts | null {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(name);
-  if (!match) return null;
-  return { y: Number(match[1]), mo: Number(match[2]), d: Number(match[3]) };
 }
 
 export function makeLocalDate(y: number, mo: number, d: number, hh = 0, mm = 0): Date {
@@ -280,7 +296,12 @@ export async function collectHabitStats(
   const needle = options.habitKey.toLowerCase();
 
   for (const file of files) {
-    const day = parseYMD(file.basename);
+    const withoutExt = file.path.replace(/\.md$/i, "");
+    const relativePath = folder ? withoutExt.slice(folderPrefix.length) : withoutExt;
+    let day = parseDailyNoteName(relativePath, options.dailyNoteFormat);
+    if (!day && !folder) {
+      day = parseDailyNoteName(file.basename, options.dailyNoteFormat);
+    }
     if (!day) continue;
 
     const content = await context.vault.cachedRead(file);

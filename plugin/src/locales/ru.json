@@ -9,6 +9,8 @@
   "settings.language.options.ru": "Русский",
   "settings.dailyFolder.label": "Папка с дэйли",
   "settings.dailyFolder.desc": "Папка, в которой искать ежедневные заметки.",
+  "settings.dailyNoteFormat.label": "Формат имени дэйли",
+  "settings.dailyNoteFormat.desc": "Шаблон Moment.js для имени файла ежедневной заметки.",
   "settings.templatePath.label": "Шаблон ежедневника",
   "settings.templatePath.desc": "Необязательный шаблон для создаваемой заметки.",
   "settings.border.label": "Показывать рамку",

@@ -9,6 +9,8 @@ import {
 } from "obsidian";
 import HabitButtonPlugin from "../src/main";
 import type { HabitButtonSettings } from "../src/settings";
+import { DEFAULT_DAILY_NOTE_FORMAT } from "../src/settings";
+import { formatDailyNoteName, normalizeDailyNoteFormat } from "../src/habit-core";
 
 class FakeVault {
   files: Map<string, string> = new Map();
@@ -159,13 +161,13 @@ export async function renderBlock(
   await processor(source, container, mergedCtx);
   return container;
 }
-export function getTodayPath(folder: string): string {
+export function getTodayPath(folder: string, format?: string): string {
+  const normalizedFormat = normalizeDailyNoteFormat(format, DEFAULT_DAILY_NOTE_FORMAT);
   const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-  const fileName = `${yyyy}-${mm}-${dd}.md`;
-  return folder ? `${folder}/${fileName}` : fileName;
+  const noteName = formatDailyNoteName(today, normalizedFormat);
+  const trimmedFolder = folder?.trim().replace(/^\/+|\/+$/g, "") ?? "";
+  const prefix = trimmedFolder ? `${trimmedFolder}/` : "";
+  return `${prefix}${noteName}.md`;
 }
 export async function flushPromises(): Promise<void> {
   await Promise.resolve();

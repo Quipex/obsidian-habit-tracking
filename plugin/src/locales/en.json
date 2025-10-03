@@ -9,6 +9,8 @@
   "settings.language.options.ru": "Russian",
   "settings.dailyFolder.label": "Daily folder",
   "settings.dailyFolder.desc": "Folder that contains daily notes to scan for habits.",
+  "settings.dailyNoteFormat.label": "Daily note format",
+  "settings.dailyNoteFormat.desc": "Moment.js pattern used for daily note file names.",
   "settings.templatePath.label": "Daily note template",
   "settings.templatePath.desc": "Optional template used when creating a missing daily note.",
   "settings.border.label": "Show card borders",

@@ -3,8 +3,11 @@ import HabitButtonPlugin from "./main";
 import { t } from "./i18n";
 import type { LocalePreference } from "./i18n";
 
+export const DEFAULT_DAILY_NOTE_FORMAT = "YYYY-MM-DD";
+
 export interface HabitButtonSettings {
   dailyFolder: string;
+  dailyNoteFormat: string;
   defaultLayout: "grid" | "row";
   weeks: number;
   days: number;
@@ -23,6 +26,7 @@ export interface HabitButtonSettings {
 
 export const DEFAULT_SETTINGS: HabitButtonSettings = {
   dailyFolder: "daily",
+  dailyNoteFormat: DEFAULT_DAILY_NOTE_FORMAT,
   defaultLayout: "grid",
   weeks: 26,
   days: 30,
@@ -174,6 +178,19 @@ export class HabitButtonSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.dailyFolder)
           .onChange(async (value: string) => {
             this.plugin.settings.dailyFolder = value.trim() || "daily";
+            await this.plugin.saveSettings();
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName(t("settings.dailyNoteFormat.label"))
+      .setDesc(t("settings.dailyNoteFormat.desc"))
+      .addText((text) =>
+        text
+          .setPlaceholder(DEFAULT_DAILY_NOTE_FORMAT)
+          .setValue(this.plugin.settings.dailyNoteFormat || DEFAULT_DAILY_NOTE_FORMAT)
+          .onChange(async (value: string) => {
+            this.plugin.settings.dailyNoteFormat = value.trim() || DEFAULT_DAILY_NOTE_FORMAT;
             await this.plugin.saveSettings();
           }),
       );
