@@ -1,10 +1,14 @@
 {
   "id": "habit-button",
   "name": "Habit Button",
-  "version": "0.1.0",
-  "minAppVersion": "1.4.0",
-  "description": "Track habits from daily notes with a heatmap button widget.",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Track habits from daily notes with a heatmap button widget. Group them by topics and track together.",
   "author": "Quipex",
   "authorUrl": "https://github.com/Quipex",
-  "isDesktopOnly": false
+  "isDesktopOnly": false,
+  "fundingUrl": {
+    "Buy Me a Coffee": "https://buymeacoffee.com/quipex",
+    "Ko-fi": "https://ko-fi.com/quipex"
+  }
 }
