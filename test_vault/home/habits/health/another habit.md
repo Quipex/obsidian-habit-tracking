@@ -4,4 +4,5 @@ group: health
 title: drink protein
 icon: 💪
 border: true
+weeks: 44
 ```
