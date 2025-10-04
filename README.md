@@ -1,6 +1,8 @@
 # Obsidian Habit Button
 
-A modern Obsidian plugin that turns YAML blocks into trackable habits with a single tap, adaptive heatmaps, and group dashboards you can drop anywhere—including Canvas.
+This plugin lets you track your habits in a single tap. Features like streaks and heatmaps will help you staying motivated, while grace and warning periods will allow you to stay flexible within your timeline.
+
+You can drop in your habit buttons anywhere including Canvas. To not lose the focus on lots of habits, there are groups that provide a quick status.
 
 ## Demo
 
