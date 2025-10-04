@@ -58,7 +58,7 @@
   "meta.justNow": "just now",
   "meta.minutesAgo": "${1}m ago",
   "meta.hoursAgo": "${1}h ago",
-  "meta.daysAgo": "${1} d ago",
+  "meta.daysAgo": "${1}d ago",
   "overdue.label": "<${1}h 🔥",
   "snippet.title": "My habit",
   "snippet.heatLayoutComment": "# \"grid\" or \"row\""
