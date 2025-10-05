@@ -18,7 +18,6 @@ export interface HabitBlockOptions {
   cellGap?: number;
   dotSize?: number;
   dotGap?: number;
-  templatePath?: string;
   border?: boolean;
 }
 

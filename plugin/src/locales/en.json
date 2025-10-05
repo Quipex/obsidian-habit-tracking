@@ -61,5 +61,17 @@
   "meta.daysAgo": "${1}d ago",
   "overdue.label": "<${1}h 🔥",
   "snippet.title": "My habit",
-  "snippet.heatLayoutComment": "# \"grid\" or \"row\""
+  "snippet.optionsHeading": "# Optional overrides (remove '#' before the property name to apply it):",
+  "snippet.heatLayoutLine": "# heatLayout: ${1} # \"grid\" or \"row\"",
+  "snippet.groupLine": "# group: morning # the name of the habit-group. should match the 'group' property in the habit-group block",
+  "snippet.iconLine": "# icon: ☀️",
+  "snippet.weeksLine": "# weeks: 26 # applies for 'heatLayout: grid' only",
+  "snippet.daysLine": "# days: 30 # applies for 'heatLayout: row' only",
+  "snippet.graceLine": "# gracePeriodHours: 24 # How many hours can pass before the streak breaks (warning window is added on top)",
+  "snippet.warningLine": "# warningWindowHours: 6 # Hours before the break when the flame indicator appears",
+  "snippet.cellSizeLine": "# cellSize: 9 # Pixel size of heatmap cells",
+  "snippet.cellGapLine": "# cellGap: 3 # Space between heatmap cells",
+  "snippet.dotSizeLine": "# dotSize: 8 # Pixel size of heatmap dots",
+  "snippet.dotGapLine": "# dotGap: 4 # Space between heatmap dots",
+  "snippet.borderLine": "# border: true # Show card borders"
 }
