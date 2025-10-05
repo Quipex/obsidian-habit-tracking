@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { bootstrapPlugin } from "./harness";
+import { HABIT_BLOCK_OPTION_KEYS } from "../src/habit-core";
 
 class FakeEditor {
   public buffer = "";
@@ -45,5 +46,10 @@ describe("command snippet", () => {
     ].join("\n");
 
     expect(editor.buffer).toBe(expectedSnippet);
+
+    for (const key of HABIT_BLOCK_OPTION_KEYS) {
+      const token = key === "title" ? "title:" : `# ${key}:`;
+      expect(editor.buffer.includes(token)).toBe(true);
+    }
   });
 });

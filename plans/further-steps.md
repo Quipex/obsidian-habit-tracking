@@ -1,6 +1,6 @@
 # Ideas to implement
 
-- [ ] make a button template include all the possible settings to tweak the button in one go.
+- [x] make a button template include all the possible settings to tweak the button in one go.
 - [ ] create a group command template
 - [ ] remove eagerScan from group. make it eager when needed (e.g. when the location is included).
 - [ ] finish a readme. add a FAQ with an explanation on how to refresh the widget state (switching to another page)

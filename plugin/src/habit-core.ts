@@ -1,4 +1,5 @@
-import { parseYaml, moment } from "obsidian";
+import { parseYaml } from "obsidian";
+import moment from "moment";
 import type { TFile } from "obsidian";
 import type { HabitButtonSettings } from "./settings";
 import { DEFAULT_DAILY_NOTE_FORMAT } from "./settings";
@@ -20,6 +21,34 @@ export interface HabitBlockOptions {
   dotGap?: number;
   border?: boolean;
 }
+
+export const HABIT_BLOCK_OPTION_KEYS = [
+  "title",
+  "group",
+  "gracePeriodHours",
+  "warningWindowHours",
+  "icon",
+  "heatLayout",
+  "weeks",
+  "days",
+  "cellSize",
+  "cellGap",
+  "dotSize",
+  "dotGap",
+  "border",
+] as const;
+
+export type HabitBlockOptionKey = (typeof HABIT_BLOCK_OPTION_KEYS)[number];
+
+type ExpectTrue<T extends true> = T;
+type NoMissingHabitBlockOptions = ExpectTrue<
+  Exclude<keyof HabitBlockOptions, HabitBlockOptionKey> extends never ? true : false
+>;
+type NoExtraHabitBlockOptions = ExpectTrue<
+  Exclude<HabitBlockOptionKey, keyof HabitBlockOptions> extends never ? true : false
+>;
+
+type _HabitBlockOptionKeysCheck = NoMissingHabitBlockOptions & NoExtraHabitBlockOptions;
 
 export interface ResolvedHabitOptions {
   title: string;

@@ -159,9 +159,9 @@ export class HabitButtonSettingTab extends PluginSettingTab {
             ru: t("settings.language.options.ru"),
           })
           .setValue(this.plugin.settings.locale)
-          .onChange(async (value: LocalePreference) => {
+          .onChange(async (value) => {
             if (value === "auto" || value === "en" || value === "ru") {
-              this.plugin.settings.locale = value;
+              this.plugin.settings.locale = value as LocalePreference;
               await this.plugin.saveSettings();
               this.plugin.refreshLocale();
               this.display();
@@ -336,7 +336,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
             sunday: t("settings.weekStart.options.sunday"),
           })
           .setValue(this.plugin.settings.weekStart)
-          .onChange(async (value: "monday" | "sunday") => {
+          .onChange(async (value) => {
             if (value === "monday" || value === "sunday") {
               this.plugin.settings.weekStart = value;
               await this.plugin.saveSettings();
@@ -351,7 +351,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         dropdown
           .addOptions({ grid: t("settings.defaultLayout.options.grid"), row: t("settings.defaultLayout.options.row") })
           .setValue(this.plugin.settings.defaultLayout)
-          .onChange(async (value: "grid" | "row") => {
+          .onChange(async (value) => {
             if (value === "grid" || value === "row") {
               this.plugin.settings.defaultLayout = value;
               await this.plugin.saveSettings();
