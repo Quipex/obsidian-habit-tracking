@@ -22,6 +22,15 @@ export interface HabitBlockOptions {
   border?: boolean;
 }
 
+export interface HabitGroupBlockOptions {
+  title?: string;
+  group?: string;
+  habitsLocations?: string[];
+  eagerScan?: boolean;
+  border?: boolean;
+  icon?: string;
+}
+
 export const HABIT_BLOCK_OPTION_KEYS = [
   "title",
   "group",
@@ -49,6 +58,26 @@ type NoExtraHabitBlockOptions = ExpectTrue<
 >;
 
 type _HabitBlockOptionKeysCheck = NoMissingHabitBlockOptions & NoExtraHabitBlockOptions;
+
+export const HABIT_GROUP_OPTION_KEYS = [
+  "title",
+  "group",
+  "habitsLocations",
+  "eagerScan",
+  "border",
+  "icon",
+] as const;
+
+export type HabitGroupOptionKey = (typeof HABIT_GROUP_OPTION_KEYS)[number];
+
+type NoMissingHabitGroupOptions = ExpectTrue<
+  Exclude<keyof HabitGroupBlockOptions, HabitGroupOptionKey> extends never ? true : false
+>;
+type NoExtraHabitGroupOptions = ExpectTrue<
+  Exclude<HabitGroupOptionKey, keyof HabitGroupBlockOptions> extends never ? true : false
+>;
+
+type _HabitGroupOptionKeysCheck = NoMissingHabitGroupOptions & NoExtraHabitGroupOptions;
 
 export interface ResolvedHabitOptions {
   title: string;

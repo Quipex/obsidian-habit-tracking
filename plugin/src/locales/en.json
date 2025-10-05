@@ -49,6 +49,7 @@
   "settings.rowDays.label": "Row days",
   "settings.rowDays.desc": "Number of days to show in row heatmap layout.",
   "commands.insertBlock": "Insert habit button block",
+  "commands.insertGroupBlock": "Insert habit group block",
   "ui.errorNoTitle": "[habit-button] Title is required",
   "ui.noticeAdded": "Added: ${1}",
   "ui.noticeError": "Failed to record habit",
@@ -73,5 +74,13 @@
   "snippet.cellGapLine": "# cellGap: 3 # Space between heatmap cells",
   "snippet.dotSizeLine": "# dotSize: 8 # Pixel size of heatmap dots",
   "snippet.dotGapLine": "# dotGap: 4 # Space between heatmap dots",
-  "snippet.borderLine": "# border: true # Show card borders"
+  "snippet.borderLine": "# border: true # Show card borders",
+  "groupSnippet.titleLine": "# title: My habit group",
+  "groupSnippet.groupLine": "group: morning",
+  "groupSnippet.optionsHeading": "# Optional overrides (remove '#' before the property name to apply it):",
+  "groupSnippet.iconLine": "# icon: ☀️",
+  "groupSnippet.locationsHeading": "# habitsLocations:",
+  "groupSnippet.locationsExample": "#   - home/habits.md",
+  "groupSnippet.eagerScanLine": "# eagerScan: false # Trigger an eager rescan of linked notes",
+  "groupSnippet.borderLine": "# border: true # Show card borders"
 }

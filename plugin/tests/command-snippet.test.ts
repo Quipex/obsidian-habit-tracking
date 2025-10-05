@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { bootstrapPlugin } from "./harness";
-import { HABIT_BLOCK_OPTION_KEYS } from "../src/habit-core";
+import { HABIT_BLOCK_OPTION_KEYS, HABIT_GROUP_OPTION_KEYS } from "../src/habit-core";
 
 class FakeEditor {
   public buffer = "";
@@ -49,6 +49,40 @@ describe("command snippet", () => {
 
     for (const key of HABIT_BLOCK_OPTION_KEYS) {
       const token = key === "title" ? "title:" : `# ${key}:`;
+      expect(editor.buffer.includes(token)).toBe(true);
+    }
+  });
+
+  it("inserts habit-group snippet respecting current settings", async () => {
+    // given
+    const plugin = await bootstrapPlugin();
+    const command = plugin.commands.find((cmd) => cmd.id === "habit-group-insert-block");
+    expect(command).toBeDefined();
+    const editor = new FakeEditor();
+
+    // when
+    command!.editorCallback?.(editor as any);
+
+    // then
+    const expectedSnippet = [
+      "```habit-group",
+      "group: morning",
+      "",
+      "# Optional overrides (remove '#' before the property name to apply it):",
+      "# title: My habit group",
+      "# icon: ☀️",
+      "# habitsLocations:",
+      "#   - home/habits.md",
+      "# eagerScan: false # Trigger an eager rescan of linked notes",
+      "# border: true # Show card borders",
+      "```",
+      "",
+    ].join("\n");
+
+    expect(editor.buffer).toBe(expectedSnippet);
+
+    for (const key of HABIT_GROUP_OPTION_KEYS) {
+      const token = key === "group" ? `${key}:` : `# ${key}:`;
       expect(editor.buffer.includes(token)).toBe(true);
     }
   });

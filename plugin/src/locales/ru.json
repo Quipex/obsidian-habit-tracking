@@ -49,6 +49,7 @@
   "settings.rowDays.label": "Дни в ленте",
   "settings.rowDays.desc": "Сколько дней показывать в тепловой ленте.",
   "commands.insertBlock": "Вставить блок Habit Button",
+  "commands.insertGroupBlock": "Вставить блок Habit Group",
   "ui.errorNoTitle": "[habit-button] Не задан title",
   "ui.noticeAdded": "Добавлено: ${1}",
   "ui.noticeError": "Ошибка при записи привычки",
@@ -73,5 +74,13 @@
   "snippet.cellGapLine": "# cellGap: 3 # Отступ между ячейками тепловой карты",
   "snippet.dotSizeLine": "# dotSize: 8 # Диаметр точек в пикселях",
   "snippet.dotGapLine": "# dotGap: 4 # Расстояние между точками",
-  "snippet.borderLine": "# border: true # Показывать рамку карточек"
+  "snippet.borderLine": "# border: true # Показывать рамку карточек",
+  "groupSnippet.titleLine": "# title: Моя группа привычек",
+  "groupSnippet.groupLine": "group: morning",
+  "groupSnippet.optionsHeading": "# Дополнительные параметры (уберите '#' перед названием, чтобы применить):",
+  "groupSnippet.iconLine": "# icon: ☀️",
+  "groupSnippet.locationsHeading": "# habitsLocations:",
+  "groupSnippet.locationsExample": "#   - home/habits.md",
+  "groupSnippet.eagerScanLine": "# eagerScan: false # Принудительно пересканировать связанные заметки",
+  "groupSnippet.borderLine": "# border: true # Показывать рамку карточек"
 }

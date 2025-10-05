@@ -30,7 +30,7 @@ import {
   cloneHabitStats,
   capitalizeFirst,
 } from "./habit-core";
-import type { HabitStats, ResolvedHabitOptions } from "./habit-core";
+import type { HabitStats, ResolvedHabitOptions, HabitGroupBlockOptions } from "./habit-core";
 import HabitRegistry, { HabitRegistryRecord } from "./habit-registry";
 import HabitEventBus from "./habit-event-bus";
 
@@ -52,15 +52,6 @@ function humanAgoShort(ts: Date | null): string {
     return t("meta.hoursAgo", days * 24 + hours);
   }
   return t("meta.daysAgo", days);
-}
-
-interface HabitGroupBlockOptions {
-  title?: string;
-  group?: string;
-  habitsLocations?: string[];
-  eagerScan?: boolean;
-  border?: boolean;
-  icon?: string;
 }
 
 type GroupSegmentState = "emerald" | "amber" | "gray";
@@ -128,6 +119,29 @@ export default class HabitButtonPlugin extends Plugin {
           t("snippet.dotSizeLine"),
           t("snippet.dotGapLine"),
           t("snippet.borderLine"),
+          "```",
+          "",
+        ].join("\n");
+        editor.replaceRange(snippet, cursor);
+      },
+    });
+
+    this.addCommand({
+      id: "habit-group-insert-block",
+      name: t("commands.insertGroupBlock"),
+      editorCallback: (editor: Editor) => {
+        const cursor = editor.getCursor();
+        const snippet = [
+          "```habit-group",
+          t("groupSnippet.groupLine"),
+          "",
+          t("groupSnippet.optionsHeading"),
+          t("groupSnippet.titleLine"),
+          t("groupSnippet.iconLine"),
+          t("groupSnippet.locationsHeading"),
+          t("groupSnippet.locationsExample"),
+          t("groupSnippet.eagerScanLine"),
+          t("groupSnippet.borderLine"),
           "```",
           "",
         ].join("\n");

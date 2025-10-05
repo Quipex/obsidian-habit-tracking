@@ -1,10 +1,21 @@
+```habit-group
+group: morning
+
+# Optional overrides (remove '#' before the property name to apply it):
+# title: My habit group
+# icon: ☀️
+# habitsLocations:
+#   - home/habits.md
+# eagerScan: false # Trigger an eager rescan of linked notes
+# border: true # Show card borders
+```
 
 ```habit-button
 title: My habit
 
 # Optional overrides (remove '#' before the property name to apply it):
 # heatLayout: grid # "grid" or "row"
-# group: morning # the name of the habit-group. should match the 'group' property in the habit-group block
+group: morning # the name of the habit-group. should match the 'group' property in the habit-group block
 icon: ☀️
 # weeks: 26 # applies for 'heatLayout: grid' only
 # days: 30 # applies for 'heatLayout: row' only
