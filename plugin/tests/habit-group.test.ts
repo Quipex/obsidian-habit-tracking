@@ -58,7 +58,6 @@ describe("habit-group block", () => {
       "title: Squad Overview",
       "group: squads",
       "habitsLocations: habits",
-      "eagerScan: true",
     ].join("\n");
 
     const groupContainer = await renderBlock(plugin, "habit-group", groupBlock);

@@ -63,11 +63,10 @@ icon: ☕
 habitsLocations:
   - habits/morning.md
   - habits/stretching.md
-eagerScan: true
 \`\`\`
 ```
 
-Groups read live data from the habit registry. Use `habitsLocations` when habits live in other notes or folders; enable `eagerScan` to rescan each render.
+Groups read live data from the habit registry. When you provide `habitsLocations`, the block eagerly rescans those notes on each render; without it, the group relies on cached registry updates from embedded habit buttons.
 
 ### Canvas placement
 

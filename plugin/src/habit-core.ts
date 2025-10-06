@@ -26,7 +26,6 @@ export interface HabitGroupBlockOptions {
   title?: string;
   group?: string;
   habitsLocations?: string[];
-  eagerScan?: boolean;
   border?: boolean;
   icon?: string;
 }
@@ -63,7 +62,6 @@ export const HABIT_GROUP_OPTION_KEYS = [
   "title",
   "group",
   "habitsLocations",
-  "eagerScan",
   "border",
   "icon",
 ] as const;

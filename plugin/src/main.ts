@@ -140,7 +140,6 @@ export default class HabitButtonPlugin extends Plugin {
           t("groupSnippet.iconLine"),
           t("groupSnippet.locationsHeading"),
           t("groupSnippet.locationsExample"),
-          t("groupSnippet.eagerScanLine"),
           t("groupSnippet.borderLine"),
           "```",
           "",
@@ -478,7 +477,6 @@ export default class HabitButtonPlugin extends Plugin {
         title: typeof data.title === "string" ? data.title : undefined,
         group: typeof data.group === "string" ? data.group : undefined,
         habitsLocations: toStringArray((data as any).habitsLocations),
-        eagerScan: typeof data.eagerScan === "boolean" ? data.eagerScan : undefined,
         border: typeof (data as any).border === "boolean" ? (data as any).border : undefined,
         icon: typeof (data as any).icon === "string" ? String((data as any).icon) : undefined,
       };
@@ -525,19 +523,18 @@ export default class HabitButtonPlugin extends Plugin {
       const captionHost = layout.createDiv({ cls: "dv-habit-group-caption" });
 
       let records = this.registry.getByGroup(groupRaw);
-      const needsScan = Boolean(rawOptions.eagerScan || records.length === 0);
+      const locations = this.resolveHabitGroupLocations(rawOptions, sourcePath);
+      const hasExplicitLocations = Boolean(rawOptions.habitsLocations?.length);
+      const needsScan = hasExplicitLocations || records.length === 0;
 
-      if (needsScan) {
-        const locations = this.resolveHabitGroupLocations(rawOptions, sourcePath);
-        if (locations.length) {
-          await this.scanHabitGroupLocations(
-            groupRaw,
-            normalizedGroup,
-            locations,
-            Boolean(rawOptions.eagerScan),
-          );
-          records = this.registry.getByGroup(groupRaw);
-        }
+      if (needsScan && locations.length) {
+        await this.scanHabitGroupLocations(
+          groupRaw,
+          normalizedGroup,
+          locations,
+          hasExplicitLocations,
+        );
+        records = this.registry.getByGroup(groupRaw);
       }
 
       const duplicates = this.collectGroupDuplicates(normalizedGroup);
@@ -547,9 +544,7 @@ export default class HabitButtonPlugin extends Plugin {
       }
 
       if (records.length === 0) {
-        const message = rawOptions.eagerScan
-          ? t("group.emptyEager")
-          : t("group.emptyPassive");
+        const message = hasExplicitLocations ? t("group.emptyEager") : t("group.emptyPassive");
         container.createDiv({ cls: "dv-habit-group-empty", text: message });
         return;
       }

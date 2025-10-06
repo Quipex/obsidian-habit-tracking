@@ -6,7 +6,6 @@ group: morning
 # icon: ☀️
 # habitsLocations:
 #   - home/habits.md
-# eagerScan: false # Trigger an eager rescan of linked notes
 # border: true # Show card borders
 ```
 

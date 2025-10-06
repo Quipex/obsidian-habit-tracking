@@ -79,8 +79,7 @@
   "groupSnippet.groupLine": "group: morning",
   "groupSnippet.optionsHeading": "# Дополнительные параметры (уберите '#' перед названием, чтобы применить):",
   "groupSnippet.iconLine": "# icon: ☀️",
-  "groupSnippet.locationsHeading": "# habitsLocations:",
+  "groupSnippet.locationsHeading": "# habitsLocations: # Укажите список заметок или папок, где лежат habit-button. Иначе группа увидит только привычки из текущей заметки.",
   "groupSnippet.locationsExample": "#   - home/habits.md",
-  "groupSnippet.eagerScanLine": "# eagerScan: false # Принудительно пересканировать связанные заметки",
   "groupSnippet.borderLine": "# border: true # Показывать рамку карточек"
 }

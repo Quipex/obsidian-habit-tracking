@@ -79,8 +79,7 @@
   "groupSnippet.groupLine": "group: morning",
   "groupSnippet.optionsHeading": "# Optional overrides (remove '#' before the property name to apply it):",
   "groupSnippet.iconLine": "# icon: ☀️",
-  "groupSnippet.locationsHeading": "# habitsLocations:",
+  "groupSnippet.locationsHeading": "# habitsLocations: # Use this list to give group a clue about the location of habit-buttons. It only knows about the habits that are in the same note.",
   "groupSnippet.locationsExample": "#   - home/habits.md",
-  "groupSnippet.eagerScanLine": "# eagerScan: false # Trigger an eager rescan of linked notes",
   "groupSnippet.borderLine": "# border: true # Show card borders"
 }
