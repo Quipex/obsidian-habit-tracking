@@ -11,6 +11,8 @@ You can drop in your habit buttons anywhere including Canvas. To not lose the fo
 - render a tap-to-log habit card with streak, heatmap, and overdue hints
 - supports per-block icons, grace periods, and granular layouts
 
+![Habit button demo](assets/habit-button-demo.gif)
+
 ### Habit Group
 
 - aggregate multiple habits into a summarized status bar

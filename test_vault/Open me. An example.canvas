@@ -1,6 +1,6 @@
 {
 	"nodes":[
-		{"id":"effea5282926a539","type":"text","text":"```habit-button\ntitle: утренняя зарядка\nicon: 🧘\ngracePeriodHours: 16\ngroup: health\n```","x":-2420,"y":-1440,"width":480,"height":180},
+		{"id":"effea5282926a539","type":"text","text":"```habit-button\ntitle: morning stretch\nicon: 🧘\ngracePeriodHours: 16\ngroup: health\n```","x":-2420,"y":-1440,"width":480,"height":180},
 		{"id":"a4cb31736ae193f5","type":"text","text":"```habit-button\ntitle: functional training\nicon: 🏋️\ngracePeriodHours: 24\ngroup: health\n```","x":-2420,"y":-1200,"width":480,"height":180},
 		{"id":"06aea24cd2bafd7c","type":"text","text":"```habit-button\ntitle: call mom\nicon: ☎️\ngroup: relationship\n```","x":-1640,"y":-1440,"width":480,"height":180},
 		{"id":"d82f5222d74eb4bf","type":"text","text":"```habit-button\ntitle: gift a bouquet\nicon: 💐\ngroup: relationship\n```","x":-1640,"y":-1200,"width":480,"height":180},
