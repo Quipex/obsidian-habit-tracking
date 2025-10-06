@@ -1,8 +1,5 @@
-import tinyI18n, { createIsolateI18n } from "./i18n-wrapper";
 import en from "./locales/en.json";
 import ru from "./locales/ru.json";
-
-const instance = createIsolateI18n();
 
 const LOCALE_TABLE = [
   ["en", en],
@@ -21,12 +18,22 @@ const supportedLocales: SupportedLocale[] = LOCALE_TABLE.map(([code]) => code);
 
 const FALLBACK_LOCALE: SupportedLocale = "en";
 
-for (const [code, dict] of LOCALE_TABLE) {
-  instance.setDictionary(dict as LocaleDictionary, code);
+let currentLocale: SupportedLocale = FALLBACK_LOCALE;
+
+function format(template: string, values: Array<string>): string {
+  return template.replace(/\$\{(\d+)\}/g, (_match, indexRaw) => {
+    const index = Number(indexRaw) - 1;
+    return index >= 0 && index < values.length ? values[index] : "";
+  });
 }
 
-let currentLocale: SupportedLocale = FALLBACK_LOCALE;
-instance.setLanguage(FALLBACK_LOCALE);
+function translate(key: string, args: Array<string>): string {
+  const localeDict = dictionaries[currentLocale] ?? {};
+  const fallbackDict = dictionaries[FALLBACK_LOCALE] ?? {};
+  const template = localeDict[key] ?? fallbackDict[key];
+  if (!template) return key;
+  return format(template, args);
+}
 
 function matchLocale(locale: string | undefined | null): SupportedLocale | null {
   if (!locale) return null;
@@ -39,7 +46,6 @@ function matchLocale(locale: string | undefined | null): SupportedLocale | null 
 
 function setResolvedLocale(locale: SupportedLocale): void {
   currentLocale = locale;
-  instance.setLanguage(locale);
 }
 
 export type LocalePreference = "auto" | SupportedLocale;
@@ -74,9 +80,7 @@ export function getLocale(): SupportedLocale {
 }
 
 export function t(key: string, ...args: Array<string | number>): string {
-  const translated = instance.i18n(key, ...args.map(String));
-  return translated ?? key;
+  return translate(key, args.map(String));
 }
 
 export const availableLocales: SupportedLocale[] = [...supportedLocales];
-

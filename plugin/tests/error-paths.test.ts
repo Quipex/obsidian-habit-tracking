@@ -18,6 +18,12 @@ describe("error paths", () => {
     // given
     const plugin = await bootstrapPlugin();
     const invalidBlock = `title: [unclosed`;
+    const errorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const warnSpy = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => {});
 
     // when
     const container = await renderHabitBlock(plugin, invalidBlock);
@@ -25,6 +31,8 @@ describe("error paths", () => {
     // then
     const pre = container.querySelector("pre");
     expect(pre?.textContent).toBe("[habit-button] Title is required");
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
   });
 
   it("shows notice when logging fails", async () => {

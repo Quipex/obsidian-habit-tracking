@@ -42,7 +42,7 @@ describe("Habit meta warnings", () => {
   });
 
   describe("gracePeriodHours specified", () => {
-    it("activates warning when less than a day remains", async () => {
+    it("shows time left warning when less than a day remains", async () => {
       // given
       const plugin = await bootstrapPlugin();
       seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 30 }], NOW);
@@ -50,14 +50,13 @@ describe("Habit meta warnings", () => {
 
       // when
       const container = await renderHabit(plugin, habitDefinition);
-      const { card, last, streak, button } = getHabitMetaElements(container);
+      const { card, last, streak, button, timeLeft } = getHabitMetaElements(container);
 
       // then
-      expect(last.classList.contains("is-overdue")).toBe(true);
+      expect(last.classList.contains("is-overdue")).toBe(false);
       expect(last.textContent).toBe("30h ago");
       expect(streak.textContent?.startsWith("Streak: 1 days")).toBe(true);
       expect(streak.classList.contains("is-zero")).toBe(false);
-      const timeLeft = streak.querySelector<HTMLSpanElement>(".time-left");
       expect(timeLeft).not.toBeNull();
       expect(timeLeft?.textContent).toBe(" <6h 🔥");
       expect(card.classList.contains("is-done")).toBe(false);
@@ -124,12 +123,11 @@ describe("Habit meta warnings", () => {
 
       // when
       const container = await renderHabit(plugin, habitDefinition);
-      const { last, streak } = getHabitMetaElements(container);
+      const { last, timeLeft } = getHabitMetaElements(container);
 
       // then
-      const hint = streak.querySelector<HTMLSpanElement>(".time-left");
-      expect(hint?.textContent).toBe(" <4h 🔥");
-      expect(last.classList.contains("is-overdue")).toBe(true);
+      expect(timeLeft?.textContent).toBe(" <4h 🔥");
+      expect(last.classList.contains("is-overdue")).toBe(false);
     });
   });
 
@@ -145,11 +143,10 @@ describe("Habit meta warnings", () => {
 
       // when
       const container = await renderHabit(plugin, habitDefinition);
-      const { last, streak } = getHabitMetaElements(container);
+      const { last, streak, timeLeft } = getHabitMetaElements(container);
 
       // then
-      expect(last.classList.contains("is-overdue")).toBe(true);
-      const timeLeft = streak.querySelector<HTMLSpanElement>(".time-left");
+      expect(last.classList.contains("is-overdue")).toBe(false);
       expect(timeLeft?.textContent).toBe(" <4h 🔥");
       expect(streak.classList.contains("is-zero")).toBe(false);
     });
@@ -168,11 +165,10 @@ describe("Habit meta warnings", () => {
 
       // when
       const container = await renderHabit(plugin, habitDefinition);
-      const { last, streak } = getHabitMetaElements(container);
+      const { last, streak, timeLeft } = getHabitMetaElements(container);
 
       // then
-      expect(last.classList.contains("is-overdue")).toBe(true);
-      const timeLeft = streak.querySelector<HTMLSpanElement>(".time-left");
+      expect(last.classList.contains("is-overdue")).toBe(false);
       expect(timeLeft?.textContent).toBe(" <1h 🔥");
       expect(streak.classList.contains("is-zero")).toBe(false);
     });
@@ -187,12 +183,11 @@ describe("Habit meta warnings", () => {
 
       // when
       const container = await renderHabit(plugin, habitDefinition);
-      const { last, streak } = getHabitMetaElements(container);
+      const { last, streak, timeLeft } = getHabitMetaElements(container);
 
       // then
-      expect(last.classList.contains("is-overdue")).toBe(true);
+      expect(last.classList.contains("is-overdue")).toBe(false);
       expect(streak.classList.contains("is-zero")).toBe(false);
-      const timeLeft = streak.querySelector<HTMLSpanElement>(".time-left");
       expect(timeLeft).not.toBeNull();
       expect(timeLeft?.textContent).toBe(" <18h 🔥");
     });
@@ -205,12 +200,27 @@ describe("Habit meta warnings", () => {
 
       // when
       const container = await renderHabit(plugin, habitDefinition);
+      const { last, streak, timeLeft } = getHabitMetaElements(container);
+
+      // then
+      expect(last.classList.contains("is-overdue")).toBe(false);
+      expect(streak.classList.contains("is-zero")).toBe(false);
+      expect(timeLeft).toBeNull();
+    });
+
+    it("keeps last label neutral after grace while within warning window", async () => {
+      // given
+      const plugin = await bootstrapPlugin();
+      seedHabitEntries(plugin, HABIT_KEY, [{ hoursAgo: 26 }], NOW);
+      const habitDefinition = buildHabitDefinition({ title: HABIT_TITLE, gracePeriodHours: 24, warningWindowHours: 6 });
+
+      // when
+      const container = await renderHabit(plugin, habitDefinition);
       const { last, streak } = getHabitMetaElements(container);
 
       // then
       expect(last.classList.contains("is-overdue")).toBe(false);
       expect(streak.classList.contains("is-zero")).toBe(false);
-      expect(streak.querySelector(".time-left")).toBeNull();
     });
 
     it("drops streak once the default window is exceeded but keeps warning", async () => {

@@ -81,4 +81,32 @@ ${habitLine}`);
     expect(fileContent).toContain(`- #ritual_breathwork ${EXPECTED_TIME}`);
     expect(fileContent).not.toContain(`#habit_breathwork`);
   });
+
+  it("uses configured daily note format when creating entries", async () => {
+    // given
+    const plugin = await bootstrapPlugin({
+      dailyFolder: "rituals",
+      dailyNoteFormat: "dddd, MMMM Do YYYY",
+    });
+    const habitDefinition = `title: Meditation`;
+    const container = await renderHabitBlock(plugin, habitDefinition);
+    const button = container.querySelector<HTMLButtonElement>(".dv-habit-iconbtn");
+    expect(button).not.toBeNull();
+
+    // when
+    button!.click();
+    await flushPromises();
+
+    // then
+    const expectedPath = getTodayPath(
+      plugin.settings.dailyFolder,
+      plugin.settings.dailyNoteFormat,
+    );
+    expect(plugin.vault.files.has(expectedPath)).toBe(true);
+    expect(plugin.vault.files.has(getTodayPath(plugin.settings.dailyFolder))).toBe(false);
+
+    const fileContent = plugin.vault.files.get(expectedPath);
+    const habitLine = formatHabitEntryLine(plugin, "meditation", EXPECTED_TIME);
+    expect(fileContent).toContain(habitLine);
+  });
 });

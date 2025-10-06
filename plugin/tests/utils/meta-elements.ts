@@ -3,6 +3,7 @@ export interface HabitMetaElements {
   last: HTMLSpanElement;
   streak: HTMLSpanElement;
   button: HTMLButtonElement;
+  timeLeft: HTMLSpanElement | null;
 }
 
 export function getHabitMetaElements(container: HTMLElement): HabitMetaElements {
@@ -17,5 +18,7 @@ export function getHabitMetaElements(container: HTMLElement): HabitMetaElements 
     throw new Error("Habit meta elements missing");
   }
 
-  return { card, last, streak, button };
+  const timeLeft = streak.querySelector<HTMLSpanElement>(".time-left");
+
+  return { card, last, streak, button, timeLeft };
 }

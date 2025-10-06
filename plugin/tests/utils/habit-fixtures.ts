@@ -1,5 +1,7 @@
 import type { PluginHarness } from "../harness";
 import { formatHHMM, formatIsoDate } from "./time";
+import { formatDailyNoteName, normalizeDailyNoteFormat } from "../../src/habit-core";
+import { DEFAULT_DAILY_NOTE_FORMAT } from "../../src/settings";
 
 function normalizeTagPrefix(raw: string | undefined): string {
   const base = raw?.trim().toLowerCase() ?? "";
@@ -34,6 +36,7 @@ export function seedHabitEntries(
 ): void {
   const folder = plugin.settings.dailyFolder?.trim();
   const prefix = folder ? `${folder.replace(/^\/+|\/+$/g, "")}/` : "";
+  const noteFormat = normalizeDailyNoteFormat(plugin.settings.dailyNoteFormat, DEFAULT_DAILY_NOTE_FORMAT);
 
   for (const entry of entries) {
     const baseDate = entry.isoDate
@@ -41,7 +44,8 @@ export function seedHabitEntries(
       : new Date(now.getTime() - (entry.hoursAgo ?? 0) * 3600000);
     const isoDate = entry.isoDate ?? formatIsoDate(baseDate);
     const hhmm = formatHHMM(baseDate);
-    const path = `${prefix}${isoDate}.md`;
+    const noteName = formatDailyNoteName(baseDate, noteFormat);
+    const path = `${prefix}${noteName}.md`;
     const line = entry.rawLine ?? formatHabitEntryLine(plugin, habitKey, hhmm);
     const existing = plugin.vault.files.get(path) ?? "";
     const next = existing ? `${existing.trimEnd()}\n${line}\n` : `${line}\n`;
