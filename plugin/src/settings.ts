@@ -228,7 +228,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.dimensions.cellSize.desc")),
       {
         min: 1,
-        max: 100,
+        max: 30,
         value: this.plugin.settings.defaultCellSize,
         onChange: async (value) => {
           this.plugin.settings.defaultCellSize = value;
@@ -243,7 +243,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.dimensions.cellGap.desc")),
       {
         min: 0,
-        max: 20,
+        max: 10,
         value: this.plugin.settings.defaultCellGap,
         onChange: async (value) => {
           this.plugin.settings.defaultCellGap = value;
@@ -258,7 +258,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.dimensions.dotSize.desc")),
       {
         min: 1,
-        max: 100,
+        max: 30,
         value: this.plugin.settings.defaultDotSize,
         onChange: async (value) => {
           this.plugin.settings.defaultDotSize = value;
@@ -273,7 +273,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.dimensions.dotGap.desc")),
       {
         min: 0,
-        max: 20,
+        max: 10,
         value: this.plugin.settings.defaultDotGap,
         onChange: async (value) => {
           this.plugin.settings.defaultDotGap = value;
@@ -304,6 +304,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.gracePeriod.desc")),
       {
         min: 0,
+        max: 8760,
         value: this.plugin.settings.defaultGracePeriodHours,
         onChange: async (value) => {
           this.plugin.settings.defaultGracePeriodHours = value;
@@ -318,6 +319,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.warnWindow.desc")),
       {
         min: 0,
+        max: 8760,
         value: this.plugin.settings.defaultWarningWindowHours,
         onChange: async (value) => {
           this.plugin.settings.defaultWarningWindowHours = value;
@@ -365,6 +367,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.gridWeeks.desc")),
       {
         min: 1,
+        max: 52,
         value: this.plugin.settings.weeks,
         onChange: async (value) => {
           this.plugin.settings.weeks = value;
@@ -379,6 +382,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.rowDays.desc")),
       {
         min: 1,
+        max: 62,
         value: this.plugin.settings.days,
         onChange: async (value) => {
           this.plugin.settings.days = value;
