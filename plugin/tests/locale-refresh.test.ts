@@ -23,6 +23,18 @@ describe("locale refresh", () => {
     expect(getLocale()).toBe("ru");
   });
 
+  it("applies explicit uk locale", async () => {
+    // given
+    const plugin = await bootstrapPlugin();
+
+    // when
+    plugin.settings.locale = "ua";
+    plugin.refreshLocale();
+
+    // then
+    expect(getLocale()).toBe("ua");
+  });
+
   it("resolves auto locale from app and navigator", async () => {
     // given
     const plugin = await bootstrapPlugin();

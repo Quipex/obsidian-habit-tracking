@@ -1,9 +1,11 @@
 import en from "./locales/en.json";
 import ru from "./locales/ru.json";
+import ua from "./locales/ua.json";
 
 const LOCALE_TABLE = [
   ["en", en],
   ["ru", ru],
+  ["ua", ua],
 ] as const;
 
 type SupportedLocale = (typeof LOCALE_TABLE)[number][0];

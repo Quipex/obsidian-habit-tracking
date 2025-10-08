@@ -7,6 +7,7 @@
   "settings.language.options.auto": "Авто",
   "settings.language.options.en": "Английский",
   "settings.language.options.ru": "Русский",
+  "settings.language.options.ua": "Украинский",
   "settings.dailyFolder.label": "Папка с дэйли",
   "settings.dailyFolder.desc": "Папка, в которой искать ежедневные заметки.",
   "settings.dailyNoteFormat.label": "Формат имени дэйли",

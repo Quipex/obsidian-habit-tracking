@@ -157,10 +157,11 @@ export class HabitButtonSettingTab extends PluginSettingTab {
             auto: t("settings.language.options.auto"),
             en: t("settings.language.options.en"),
             ru: t("settings.language.options.ru"),
+            ua: t("settings.language.options.ua"),
           })
           .setValue(this.plugin.settings.locale)
           .onChange(async (value) => {
-            if (value === "auto" || value === "en" || value === "ru") {
+            if (value === "auto" || value === "en" || value === "ru" || value === "ua") {
               this.plugin.settings.locale = value as LocalePreference;
               await this.plugin.saveSettings();
               this.plugin.refreshLocale();

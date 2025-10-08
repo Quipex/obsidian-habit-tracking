@@ -7,6 +7,7 @@
   "settings.language.options.auto": "Auto",
   "settings.language.options.en": "English",
   "settings.language.options.ru": "Russian",
+  "settings.language.options.ua": "Ukrainian",
   "settings.dailyFolder.label": "Daily folder",
   "settings.dailyFolder.desc": "Folder that contains daily notes to scan for habits.",
   "settings.dailyNoteFormat.label": "Daily note format",
