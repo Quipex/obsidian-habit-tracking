@@ -8,15 +8,18 @@ const __dirname = path.dirname(__filename);
 const pluginRoot = path.resolve(__dirname, "..");
 const vaultPluginDir = path.resolve(pluginRoot, "../test_vault/.obsidian/plugins/habit-button");
 
-const filesToCopy = ["manifest.json", "main.js", "styles.css"];
+const filesToCopy = [
+  { source: path.resolve(pluginRoot, "../manifest.json"), name: "manifest.json" },
+  { source: path.join(pluginRoot, "main.js"), name: "main.js" },
+  { source: path.join(pluginRoot, "styles.css"), name: "styles.css" },
+];
 
 mkdirSync(vaultPluginDir, { recursive: true });
 
-for (const file of filesToCopy) {
-  const source = path.join(pluginRoot, file);
-  const target = path.join(vaultPluginDir, file);
+for (const { source, name } of filesToCopy) {
+  const target = path.join(vaultPluginDir, name);
   copyFileSync(source, target);
-  console.log(`Copied ${file} -> ${path.relative(pluginRoot, target)}`);
+  console.log(`Copied ${name} -> ${path.relative(pluginRoot, target)}`);
 }
 
 console.log("Sync complete.");
