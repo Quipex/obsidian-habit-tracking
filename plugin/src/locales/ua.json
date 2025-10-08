@@ -10,6 +10,8 @@
   "settings.language.options.ua": "Українська",
   "settings.dailyFolder.label": "Папка з daily",
   "settings.dailyFolder.desc": "Папка, у якій шукати щоденні нотатки.",
+  "settings.dailyNoteFormat.label": "Формат назви щоденника",
+  "settings.dailyNoteFormat.desc": "Шаблон Moment.js для імен файлів щоденних нотаток.",
   "settings.templatePath.label": "Шаблон щоденника",
   "settings.templatePath.desc": "Необов'язковий шаблон для створюваної нотатки.",
   "settings.border.label": "Показувати рамку",
