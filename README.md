@@ -91,6 +91,10 @@ Drag the rendered blocks onto a Canvas or embed them via copy/paste. The plugin 
 
 - **Adaptive warnings and styled progress** — warning windows render amber striped segments, while active habits stay emerald and inactive habits gray.
 
-- **Habit groups with sortable segments** — see emerald (healthy), amber (warning), and gray (stalled) habits aligned in a single progress bar and aggregate counter.
+- **Habit groups with progress bar** — see emerald (healthy), amber (warning), and gray (stalled) habits aligned in a single progress bar and aggregate counter.
 
 - **Canvas-ready layout** — combine multiple cards and groups into dashboards, drag them around, and keep everything synchronized with your vault data.
+
+## Known Issues
+
+- The cards are not up to date if the notes were updated in the background. To refresh the cards, reopen the note or the canvas (you can switch to a different note and back)
