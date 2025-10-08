@@ -1,13 +1,14 @@
 {
 	"nodes":[
-		{"id":"effea5282926a539","type":"text","text":"```habit-button\ntitle: morning stretch\nicon: 🧘\ngracePeriodHours: 16\ngroup: health\n```","x":-2420,"y":-1440,"width":480,"height":180},
-		{"id":"a4cb31736ae193f5","type":"text","text":"```habit-button\ntitle: functional training\nicon: 🏋️\ngracePeriodHours: 24\ngroup: health\n```","x":-2420,"y":-1200,"width":480,"height":180},
-		{"id":"06aea24cd2bafd7c","type":"text","text":"```habit-button\ntitle: call mom\nicon: ☎️\ngroup: relationship\n```","x":-1640,"y":-1440,"width":480,"height":180},
-		{"id":"d82f5222d74eb4bf","type":"text","text":"```habit-button\ntitle: gift a bouquet\nicon: 💐\ngroup: relationship\n```","x":-1640,"y":-1200,"width":480,"height":180},
 		{"id":"23789de785151f69","type":"text","text":"This group has 5 habits\n3 are on this page\nanother 2 are in other notes\n\n> check out it's properties to find out how to reproduce","x":-2414,"y":-1940,"width":360,"height":200},
-		{"id":"506dd280d2c9be10","type":"text","text":"```habit-button\ntitle: drink water\nicon: 🥤\ngracePeriodHours: 24\ngroup: health\n```","x":-2420,"y":-980,"width":480,"height":180},
-		{"id":"32047f5096e7e55f","type":"text","text":"```habit-group\ngroup: relationship\nicon: 💞\n```","x":-1640,"y":-1660,"width":294,"height":160},
-		{"id":"3e325f014f11d0c9","type":"text","text":"```habit-group\ngroup: health\nicon: 🦄\nhabitsLocations:\n  - home/habits/health\n```","x":-2420,"y":-1660,"width":294,"height":160}
+		{"id":"3e325f014f11d0c9","type":"text","text":"```habit-group\ngroup: health\nicon: 🦄\nhabitsLocations:\n  - home/habits/health\n```","x":-2420,"y":-1660,"width":294,"height":160},
+		{"id":"32047f5096e7e55f","type":"text","text":"```habit-group\ngroup: relationship\nicon: 💞\n```","x":-1840,"y":-1660,"width":294,"height":160},
+		{"id":"06aea24cd2bafd7c","type":"text","text":"```habit-button\ntitle: call mom\nicon: ☎️\ngroup: relationship\n```","x":-1840,"y":-1480,"width":480,"height":180},
+		{"id":"d82f5222d74eb4bf","type":"text","text":"```habit-button\ntitle: gift a bouquet\nicon: 💐\ngroup: relationship\n```","x":-1840,"y":-1290,"width":480,"height":180},
+		{"id":"ebde4853c3ec13a6","type":"text","text":"```habit-button\ntitle: Go for a walk\n\n# Optional overrides (remove '#' before the property name to apply it):\nheatLayout: row # \"grid\" or \"row\"\ngroup: relationship # the name of the habit-group. should match the 'group' property in the habit-group block\nicon: 🚶\nweeks: 30 # applies for 'heatLayout: grid' only\n# days: 30 # applies for 'heatLayout: row' only\n# gracePeriodHours: 24 # How many hours can pass before the streak breaks (warning window is added on top)\n# warningWindowHours: 6 # Hours before the break when the flame indicator appears\n# cellSize: 9 # Pixel size of heatmap cells\n# cellGap: 3 # Space between heatmap cells\n# dotSize: 8 # Pixel size of heatmap dots\n# dotGap: 4 # Space between heatmap dots\n# border: true # Show card borders\n```\n","x":-1840,"y":-1110,"width":480,"height":100},
+		{"id":"effea5282926a539","type":"text","text":"```habit-button\ntitle: morning stretch\nicon: 🧘\ngracePeriodHours: 16\ngroup: health\n```","x":-2420,"y":-1470,"width":480,"height":180},
+		{"id":"a4cb31736ae193f5","type":"text","text":"```habit-button\ntitle: functional training\nicon: 🏋️\ngracePeriodHours: 24\ngroup: health\n```","x":-2414,"y":-1240,"width":480,"height":180},
+		{"id":"506dd280d2c9be10","type":"text","text":"```habit-button\ntitle: drink water\nicon: 🥤\ngracePeriodHours: 24\ngroup: health\n```","x":-2414,"y":-1020,"width":480,"height":180}
 	],
 	"edges":[
 		{"id":"30ed7a0f125d3216","fromNode":"3e325f014f11d0c9","fromSide":"top","toNode":"23789de785151f69","toSide":"bottom"}
