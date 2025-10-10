@@ -404,7 +404,7 @@ export default class HabitButtonPlugin extends Plugin {
       const doneToday = state.stats.hasByISO.has(isoToday);
       card.classList.toggle("is-done", doneToday);
       iconBtn.classList.toggle("is-done", doneToday);
-      iconBtn.textContent = doneToday ? "✓" : options.icon || "□";
+      iconBtn.textContent = doneToday ? "✓" : options.icon || "🦄";
       iconBtn.setAttribute("aria-pressed", doneToday ? "true" : "false");
     };
 
