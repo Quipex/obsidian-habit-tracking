@@ -18,7 +18,7 @@ You can drop in your habit buttons anywhere including Canvas. To not lose the fo
 - aggregate multiple habits into a summarized status bar
 - highlight streak health with ordered emerald/amber/gray segments
 
-![Habit group demo](assets/habit-button-demo.gif)
+![Habit group demo](assets/habit-group-demo.gif)
 
 ### Canvas Mashup
 
