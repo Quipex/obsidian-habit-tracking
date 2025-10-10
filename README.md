@@ -41,7 +41,9 @@ All the habit information is stored in your daily notes
 
 ## Installation
 
-To use the plugin simply install it from the Obsidian marketplace.
+At the moment, the plugin is not available on the marketplace. It's still in review: <https://github.com/obsidianmd/obsidian-releases/pull/8087>
+
+~~To use the plugin simply install it from the Obsidian marketplace.~~
 
 ## Usage
 
