@@ -24,14 +24,14 @@ You can drop in your habit buttons anywhere including Canvas. To not lose the fo
 
 - mix and match buttons and groups on an Obsidian Canvas for quick daily reviews
 
-[Habit canvas editing.mp4](assets/canvas-mashup-demo.mp4)
+[Habit canvas editing](https://youtu.be/pUQ5l1xv338)
 
 ### Settings
 
 - change the default behavior of the buttons and groups
 - change the language
 
-[Settings overview.mp4](assets/settings-overview.mp4)
+[Settings overview](https://youtu.be/9IViUkCg94M)
 
 ### Your daily notes
 
