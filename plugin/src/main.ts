@@ -595,7 +595,7 @@ export default class HabitButtonPlugin extends Plugin {
     locations: string[],
     force: boolean,
   ): Promise<void> {
-    const markdownFiles = (this.app.vault.getMarkdownFiles() as TFile[]) ?? [];
+    const markdownFiles = this.app.vault.getMarkdownFiles();
     const filesByPath = new Map(markdownFiles.map((file) => [file.path, file] as const));
 
     for (const location of locations) {
@@ -892,9 +892,9 @@ export default class HabitButtonPlugin extends Plugin {
     const path = folder ? `${folder}/${fileName}` : fileName;
 
     const habitLine = `\n- ${options.habitTag} ${nowHHMM(now)}\n`;
-    let file = this.app.vault.getAbstractFileByPath(path) as TFile | null;
+    const existing = this.app.vault.getAbstractFileByPath(path);
 
-    if (!file) {
+    if (!(existing instanceof TFile)) {
       let templateContent = "";
       if (options.templatePath) {
         const templateFile = this.app.vault.getAbstractFileByPath(options.templatePath);
@@ -914,9 +914,8 @@ export default class HabitButtonPlugin extends Plugin {
       }
 
       await this.app.vault.create(path, `${templateContent}${habitLine}`);
-      file = this.app.vault.getAbstractFileByPath(path) as TFile | null;
     } else {
-      await this.app.vault.append(file, habitLine);
+      await this.app.vault.append(existing, habitLine);
     }
 
     this.markPathStale(path);
