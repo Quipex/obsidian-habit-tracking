@@ -10,6 +10,7 @@ const baseOptions: ResolvedHabitOptions = {
   warningWindowHours: 24,
   icon: undefined,
   dailyFolder: "daily",
+  dailyNoteFormat: "YYYY-MM-DD",
   heatLayout: "grid",
   weeks: 4,
   days: 30,
@@ -21,6 +22,7 @@ const baseOptions: ResolvedHabitOptions = {
   habitKey: "test",
   habitTag: "#habit_test",
   tagPrefix: "habit",
+  border: true,
 };
 
 function makeStats(overrides: Partial<HabitStats> = {}): HabitStats {
