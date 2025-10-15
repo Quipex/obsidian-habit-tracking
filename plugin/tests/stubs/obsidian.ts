@@ -157,13 +157,15 @@ export class DropdownComponent {
 
   addOptions(options: Record<string, string>): this {
     this.options = { ...this.options, ...options };
-    this.selectEl.innerHTML = "";
-    for (const [value, label] of Object.entries(this.options)) {
+    while (this.selectEl.firstChild) {
+      this.selectEl.removeChild(this.selectEl.firstChild);
+    }
+    Object.entries(this.options).forEach(([value, label]) => {
       const option = document.createElement("option");
       option.value = value;
       option.textContent = label;
       this.selectEl.appendChild(option);
-    }
+    });
     return this;
   }
 
