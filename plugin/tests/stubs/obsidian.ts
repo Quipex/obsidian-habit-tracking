@@ -27,13 +27,11 @@ export interface MarkdownPostProcessorContext {
 export class App {
   vault: any;
   workspace: any;
-  locale?: string;
   constructor() {
     this.vault = {
       getConfig: (_key: string) => undefined,
     };
     this.workspace = {};
-    this.locale = "en";
   }
 }
 
@@ -207,6 +205,9 @@ export class Plugin {
     return processor;
   }
   register(_onunload: () => void): void {}
+  registerEvent(eventRef: () => void): void {
+    this.register(eventRef);
+  }
   async loadData(): Promise<any> {
     return null;
   }

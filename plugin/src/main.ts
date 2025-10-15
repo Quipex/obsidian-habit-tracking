@@ -86,8 +86,8 @@ export default class HabitButtonPlugin extends Plugin {
       },
     );
 
-    const metadataCache = (this.app as any)?.metadataCache;
-    if (metadataCache?.on) {
+    const metadataCache = this.app.metadataCache;
+    if (typeof metadataCache?.on === "function") {
       this.registerEvent(
         metadataCache.on("changed", (file: { path?: string } | string) => {
           const path = typeof file === "string" ? file : file?.path;
@@ -183,13 +183,10 @@ export default class HabitButtonPlugin extends Plugin {
     const preference = this.settings.locale;
     const candidates: Array<string | undefined> = [
       preference === "auto" ? undefined : preference,
-      (this.app as any)?.vault?.getConfig?.("locale"),
-      (this.app as any)?.locale,
       typeof navigator !== "undefined" ? navigator.language : undefined,
     ];
     applyLocale(preference, candidates);
   }
-
 
   private renderError(el: HTMLElement, message: string): void {
     el.empty();
@@ -476,9 +473,9 @@ export default class HabitButtonPlugin extends Plugin {
       return {
         title: typeof data.title === "string" ? data.title : undefined,
         group: typeof data.group === "string" ? data.group : undefined,
-        habitsLocations: toStringArray((data as any).habitsLocations),
-        border: typeof (data as any).border === "boolean" ? (data as any).border : undefined,
-        icon: typeof (data as any).icon === "string" ? String((data as any).icon) : undefined,
+        habitsLocations: toStringArray(data.habitsLocations),
+        border: typeof data.border === "boolean" ? data.border : undefined,
+        icon: typeof data.icon === "string" ? data.icon : undefined,
       };
     } catch (error) {
       console.warn("Habit Group: failed to parse block", error);
@@ -809,9 +806,10 @@ export default class HabitButtonPlugin extends Plugin {
   }
 
   private openPath(target: string, from: string): void {
-    const openLinkText = (this.app.workspace as any)?.openLinkText;
-    if (typeof openLinkText === "function") {
-      openLinkText(target, from, false);
+    const { workspace } = this.app;
+    const openLinkText = workspace?.openLinkText?.bind(workspace);
+    if (openLinkText) {
+      void openLinkText(target, from, false);
     }
   }
 

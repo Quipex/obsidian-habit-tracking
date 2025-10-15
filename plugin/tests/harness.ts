@@ -54,6 +54,9 @@ class FakeVault {
 class FakeApp {
   vault = new FakeVault();
   workspace = {};
+  metadataCache = {
+    on: vi.fn((_event: string, _callback: (...args: any[]) => void) => () => {}),
+  };
 }
 
 const manifest: PluginManifest = {
