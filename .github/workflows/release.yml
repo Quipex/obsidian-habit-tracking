@@ -1,18 +1,20 @@
 name: Release Plugin
 
 on:
-  workflow_run:
-    workflows:
-      - Functional Tests
-    types:
-      - completed
+  push:
+    tags:
+      - "*"
 
 permissions:
   contents: write
 
 jobs:
+  functional-tests:
+    uses: ./.github/workflows/functional-tests.yml
+    secrets: inherit
+
   build-and-release:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && (github.event.workflow_run.head_branch == '' || github.event.workflow_run.head_branch == null) }}
+    needs: functional-tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -22,8 +24,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -38,29 +38,13 @@ jobs:
       - name: Build plugin bundle
         run: npm run build
 
-      - name: Determine release tag
-        id: tag
-        run: |
-          git fetch --force --tags origin
-          tag_sha="${{ github.event.workflow_run.head_sha }}"
-          tag="$(git tag --points-at "${tag_sha}" | head -n 1)"
-
-          if [ -z "$tag" ]; then
-            echo "No tag pointing at ${tag_sha}. Skipping release."
-            echo "release=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "Release tag: $tag"
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "release=true" >> "$GITHUB_OUTPUT"
-
       - name: Create release
-        if: steps.tag.outputs.release == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ steps.tag.outputs.tag }}" \
-            --title="${{ steps.tag.outputs.tag }}" \
+          tag="${GITHUB_REF#refs/tags/}"
+
+          gh release create "$tag" \
+            --title="$tag" \
             --draft \
             main.js ../manifest.json styles.css
