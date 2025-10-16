@@ -1,7 +1,7 @@
 {
   "id": "habit-button",
   "name": "Habit Button",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "minAppVersion": "1.6.7",
   "description": "Track habits from daily notes with a heatmap button widget. Group them by topics and track together.",
   "author": "Quipex",
