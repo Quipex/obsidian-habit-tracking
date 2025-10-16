@@ -3,11 +3,14 @@ import {
   Command,
   MarkdownPostProcessor,
   MarkdownPostProcessorContext,
+  MarkdownRenderChild,
   PluginManifest,
   TFile,
 } from "obsidian";
 import HabitButtonPlugin from "../src/main";
 import type { HabitButtonSettings } from "../src/settings";
+import { DEFAULT_DAILY_NOTE_FORMAT } from "../src/settings";
+import { formatDailyNoteName, normalizeDailyNoteFormat } from "../src/habit-core";
 
 class FakeVault {
   files: Map<string, string> = new Map();
@@ -51,6 +54,9 @@ class FakeVault {
 class FakeApp {
   vault = new FakeVault();
   workspace = {};
+  metadataCache = {
+    on: vi.fn((_event: string, _callback: (...args: any[]) => void) => () => {}),
+  };
 }
 
 const manifest: PluginManifest = {
@@ -135,18 +141,36 @@ export async function renderHabitBlock(
   source: string,
   ctx: Partial<MarkdownPostProcessorContext> = {},
 ): Promise<HTMLElement> {
-  const processor = getCodeBlockProcessor(plugin);
+  return renderBlock(plugin, "habit-button", source, ctx);
+}
+
+export async function renderBlock(
+  plugin: PluginHarness,
+  language: string,
+  source: string,
+  ctx: Partial<MarkdownPostProcessorContext> = {},
+): Promise<HTMLElement> {
+  const processor = getCodeBlockProcessor(plugin, language);
   const container = document.createElement("div");
-  await processor(source, container, ctx as MarkdownPostProcessorContext);
+  const mergedCtx: MarkdownPostProcessorContext = {
+    sourcePath: ctx.sourcePath ?? "vault/mock.md",
+    addChild: ctx.addChild
+      ? ctx.addChild
+      : (child: MarkdownRenderChild) => {
+          child.onload?.();
+        },
+  };
+  Object.assign(mergedCtx, ctx);
+  await processor(source, container, mergedCtx);
   return container;
 }
-export function getTodayPath(folder: string): string {
+export function getTodayPath(folder: string, format?: string): string {
+  const normalizedFormat = normalizeDailyNoteFormat(format, DEFAULT_DAILY_NOTE_FORMAT);
   const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-  const fileName = `${yyyy}-${mm}-${dd}.md`;
-  return folder ? `${folder}/${fileName}` : fileName;
+  const noteName = formatDailyNoteName(today, normalizedFormat);
+  const trimmedFolder = folder?.trim().replace(/^\/+|\/+$/g, "") ?? "";
+  const prefix = trimmedFolder ? `${trimmedFolder}/` : "";
+  return `${prefix}${noteName}.md`;
 }
 export async function flushPromises(): Promise<void> {
   await Promise.resolve();

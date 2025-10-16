@@ -1,6 +1,7 @@
 import {
   Editor,
   MarkdownPostProcessorContext,
+  MarkdownRenderChild,
   Notice,
   Plugin,
   TFile,
@@ -13,108 +14,25 @@ import {
 } from "./settings";
 import { applyLocale, t } from "./i18n";
 import styles from "../styles.css";
-
-type HeatLayout = "grid" | "row";
-
-interface HabitBlockOptions {
-  title?: string;
-  gracePeriodHours?: number;
-  warningWindowHours?: number;
-  icon?: string;
-  heatLayout?: HeatLayout;
-  weeks?: number;
-  days?: number;
-  cellSize?: number;
-  cellGap?: number;
-  dotSize?: number;
-  dotGap?: number;
-}
-
-interface ResolvedHabitOptions {
-  title: string;
-  normalizedTitle: string;
-  gracePeriodHours?: number;
-  warningWindowHours: number;
-  icon?: string;
-  dailyFolder: string;
-  heatLayout: HeatLayout;
-  weeks: number;
-  days: number;
-  cellSize: number;
-  cellGap: number;
-  dotSize: number;
-  dotGap: number;
-  templatePath?: string;
-  habitKey: string;
-  habitTag: string;
-}
-
-interface HabitStats {
-  countsByISO: Map<string, number>;
-  hasByISO: Set<string>;
-  lastTsByISO: Map<string, Date>;
-  lastTs: Date | null;
-  streak: number;
-  allowedGapH: number;
-  allowedGapMs: number;
-  warningWindowHours: number;
-}
-
-interface HabitDayParts {
-  y: number;
-  mo: number;
-  d: number;
-}
-
-function pad2(n: number): string {
-  return String(n).padStart(2, "0");
-}
-
-function normalizeWhitespace(value: string): string {
-  return value.trim().replace(/\s+/g, " ");
-}
-
-function capitalizeFirst(value: string): string {
-  if (!value) return value;
-  return value[0].toUpperCase() + value.slice(1);
-}
-
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function toHabitKey(value: string): string {
-  const lower = value.toLowerCase();
-  return lower
-    .replace(/\s+/g, "_")
-    .replace(/[^a-zа-яё0-9_]/gi, "")
-    .replace(/_+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
-
-function nowHHMM(now: Date): string {
-  return `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
-}
-
-function parseYMD(name: string): HabitDayParts | null {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(name);
-  if (!match) return null;
-  return { y: Number(match[1]), mo: Number(match[2]), d: Number(match[3]) };
-}
-
-function makeLocalDate(y: number, mo: number, d: number, hh = 0, mm = 0): Date {
-  return new Date(y, mo - 1, d, hh, mm, 0, 0);
-}
-
-function isoOf(y: number, mo: number, d: number): string {
-  return `${y}-${pad2(mo)}-${pad2(d)}`;
-}
-
-function today0(): Date {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  return now;
-}
+import {
+  clampPositive,
+  collectHabitStats,
+  computeStreakByDays,
+  ensureTrailingNewline,
+  isoOf,
+  nowHHMM,
+  parseHabitBlock,
+  formatDailyNoteName,
+  resolveHabitOptions,
+  sortDatesAscending,
+  today0,
+  trimSlashes,
+  cloneHabitStats,
+  capitalizeFirst,
+} from "./habit-core";
+import type { HabitStats, ResolvedHabitOptions, HabitGroupBlockOptions } from "./habit-core";
+import HabitRegistry, { HabitRegistryRecord } from "./habit-registry";
+import HabitEventBus from "./habit-event-bus";
 
 function humanAgoShort(ts: Date | null): string {
   if (!ts) return "—";
@@ -136,52 +54,20 @@ function humanAgoShort(ts: Date | null): string {
   return t("meta.daysAgo", days);
 }
 
-function computeStreakByDays(days: Date[], allowedGapMs: number): number {
-  if (!days.length) return 0;
-  const now = Date.now();
-  const last = days[days.length - 1];
-  if (now - last.getTime() > allowedGapMs) return 0;
-
-  let streak = 1;
-  for (let i = days.length - 2; i >= 0; i--) {
-    if (days[i + 1].getTime() - days[i].getTime() <= allowedGapMs) streak++;
-    else break;
-  }
-  return streak;
-}
-
-function sortDatesAscending(list: Iterable<Date>): Date[] {
-  return Array.from(list).sort((a, b) => a.getTime() - b.getTime());
-}
-
-function ensureTrailingNewline(value: string): string {
-  if (!value.endsWith("\n")) return `${value}\n`;
-  return value;
-}
-
-function trimSlashes(path: string): string {
-  return path.replace(/^\/+|\/+$/g, "");
-}
-
-function normalizeTagPrefix(value: string): string {
-  const base = value.trim().toLowerCase();
-  if (!base) return "habit";
-  const sanitized = base
-    .replace(/[^a-zа-яё0-9_]/gi, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_+|_+$/g, "");
-  return sanitized || "habit";
-}
-
-function clampPositive(value: number, fallback: number, min = 1, max = Number.MAX_SAFE_INTEGER): number {
-  if (!Number.isFinite(value)) return fallback;
-  const rounded = Math.round(value);
-  return Math.min(max, Math.max(min, rounded));
-}
+type GroupSegmentState = "emerald" | "amber" | "gray";
 
 export default class HabitButtonPlugin extends Plugin {
   settings: HabitButtonSettings = DEFAULT_SETTINGS;
   private styleEl: HTMLStyleElement | null = null;
+  private registry = new HabitRegistry();
+  private anonymousSourceCounter = 0;
+  private stalePaths = new Set<string>();
+  private groupScanCache = new Map<string, Set<string>>();
+  private events = new HabitEventBus();
+
+  getHabitRegistry(): HabitRegistry {
+    return this.registry;
+  }
 
   async onload(): Promise<void> {
     await this.loadSettings();
@@ -193,6 +79,23 @@ export default class HabitButtonPlugin extends Plugin {
       (source, el, ctx) => this.renderHabitButton(source, el, ctx),
     );
 
+    this.registerMarkdownCodeBlockProcessor(
+      "habit-group",
+      (source, el, ctx) => {
+        void this.renderHabitGroup(source, el, ctx);
+      },
+    );
+
+    const metadataCache = this.app.metadataCache;
+    if (typeof metadataCache?.on === "function") {
+      this.registerEvent(
+        metadataCache.on("changed", (file: { path?: string } | string) => {
+          const path = typeof file === "string" ? file : file?.path;
+          if (path) this.markPathStale(path);
+        }),
+      );
+    }
+
     this.addCommand({
       id: "habit-button-insert-block",
       name: t("commands.insertBlock"),
@@ -202,8 +105,42 @@ export default class HabitButtonPlugin extends Plugin {
         const snippet = [
           "```habit-button",
           `title: ${t("snippet.title")}`,
-          `heatLayout: ${defaultLayout}`,
-          t("snippet.heatLayoutComment"),
+          "",
+          t("snippet.optionsHeading"),
+          t("snippet.heatLayoutLine", defaultLayout),
+          t("snippet.groupLine"),
+          t("snippet.iconLine"),
+          t("snippet.weeksLine"),
+          t("snippet.daysLine"),
+          t("snippet.graceLine"),
+          t("snippet.warningLine"),
+          t("snippet.cellSizeLine"),
+          t("snippet.cellGapLine"),
+          t("snippet.dotSizeLine"),
+          t("snippet.dotGapLine"),
+          t("snippet.borderLine"),
+          "```",
+          "",
+        ].join("\n");
+        editor.replaceRange(snippet, cursor);
+      },
+    });
+
+    this.addCommand({
+      id: "habit-group-insert-block",
+      name: t("commands.insertGroupBlock"),
+      editorCallback: (editor: Editor) => {
+        const cursor = editor.getCursor();
+        const snippet = [
+          "```habit-group",
+          t("groupSnippet.groupLine"),
+          "",
+          t("groupSnippet.optionsHeading"),
+          t("groupSnippet.titleLine"),
+          t("groupSnippet.iconLine"),
+          t("groupSnippet.locationsHeading"),
+          t("groupSnippet.locationsExample"),
+          t("groupSnippet.borderLine"),
           "```",
           "",
         ].join("\n");
@@ -218,6 +155,11 @@ export default class HabitButtonPlugin extends Plugin {
 
   onunload(): void {
     this.disposeStyles();
+    this.registry.clear();
+    this.anonymousSourceCounter = 0;
+    this.events.clear();
+    this.stalePaths.clear();
+    this.groupScanCache.clear();
   }
 
   private injectStyles(): void {
@@ -241,160 +183,9 @@ export default class HabitButtonPlugin extends Plugin {
     const preference = this.settings.locale;
     const candidates: Array<string | undefined> = [
       preference === "auto" ? undefined : preference,
-      (this.app as any)?.vault?.getConfig?.("locale"),
-      (this.app as any)?.locale,
       typeof navigator !== "undefined" ? navigator.language : undefined,
     ];
     applyLocale(preference, candidates);
-  }
-
-  private parseBlock(source: string): HabitBlockOptions {
-    const trimmed = source.trim();
-    if (!trimmed) return {};
-    try {
-      const parsed = parseYaml(trimmed);
-      if (typeof parsed === "object" && parsed) return parsed as HabitBlockOptions;
-      return {};
-    } catch (error) {
-      console.warn("Habit Button: failed to parse block", error);
-      return {};
-    }
-  }
-
-  private resolveOptions(raw: HabitBlockOptions): ResolvedHabitOptions | null {
-    const title = raw.title ? normalizeWhitespace(String(raw.title)) : "";
-    if (!title) return null;
-
-    const normalizedTitle = capitalizeFirst(title);
-    const layout = raw.heatLayout === "row" ? "row" : raw.heatLayout === "grid" ? "grid" : this.settings.defaultLayout;
-
-    const weeks = Number.isFinite(raw.weeks) ? Math.max(1, Number(raw.weeks)) : this.settings.weeks;
-    const days = Number.isFinite(raw.days) ? Math.max(1, Number(raw.days)) : this.settings.days;
-
-    const settingsFolder = (this.settings.dailyFolder ?? DEFAULT_SETTINGS.dailyFolder).trim();
-    const dailyFolder = settingsFolder ? trimSlashes(settingsFolder) : "";
-
-    const templateCandidate = (this.settings.templatePath ?? "").trim();
-    const templatePath = templateCandidate ? templateCandidate : undefined;
-
-    const defaultCellSize = clampPositive(this.settings.defaultCellSize, DEFAULT_SETTINGS.defaultCellSize);
-    const defaultCellGap = clampPositive(this.settings.defaultCellGap, DEFAULT_SETTINGS.defaultCellGap, 0);
-    const defaultDotSize = clampPositive(this.settings.defaultDotSize, DEFAULT_SETTINGS.defaultDotSize);
-    const defaultDotGap = clampPositive(this.settings.defaultDotGap, DEFAULT_SETTINGS.defaultDotGap, 0);
-    const defaultWarningWindow = clampPositive(
-      this.settings.defaultWarningWindowHours,
-      DEFAULT_SETTINGS.defaultWarningWindowHours,
-      0,
-    );
-
-    const cellSize = Number.isFinite(raw.cellSize)
-      ? clampPositive(Number(raw.cellSize), defaultCellSize)
-      : defaultCellSize;
-    const cellGap = Number.isFinite(raw.cellGap)
-      ? clampPositive(Number(raw.cellGap), defaultCellGap, 0)
-      : defaultCellGap;
-    const dotSize = Number.isFinite(raw.dotSize)
-      ? clampPositive(Number(raw.dotSize), defaultDotSize)
-      : defaultDotSize;
-    const dotGap = Number.isFinite(raw.dotGap)
-      ? clampPositive(Number(raw.dotGap), defaultDotGap, 0)
-      : defaultDotGap;
-
-    const tagPrefix = normalizeTagPrefix(this.settings.tagPrefix ?? DEFAULT_SETTINGS.tagPrefix);
-    const habitKey = toHabitKey(title);
-
-    return {
-      title,
-      normalizedTitle,
-      icon: raw.icon,
-      gracePeriodHours: typeof raw.gracePeriodHours === "number" ? raw.gracePeriodHours : undefined,
-      warningWindowHours: Number.isFinite(raw.warningWindowHours)
-        ? clampPositive(Number(raw.warningWindowHours), defaultWarningWindow, 0)
-        : defaultWarningWindow,
-      dailyFolder,
-      heatLayout: layout,
-      weeks,
-      days,
-      cellSize,
-      cellGap,
-      dotSize,
-      dotGap,
-      templatePath,
-      habitKey,
-      habitTag: `#${tagPrefix}_${habitKey}`,
-    };
-  }
-
-  private async collectHabitStats(options: ResolvedHabitOptions): Promise<HabitStats> {
-    const countsByISO = new Map<string, number>();
-    const hasByISO = new Set<string>();
-    const lastTsByISO = new Map<string, Date>();
-
-    const folder = trimSlashes(options.dailyFolder);
-    const folderPrefix = folder ? `${folder}/` : "";
-
-    const files = (this.app.vault
-      .getMarkdownFiles() as TFile[])
-      .filter((file) => (folder ? file.path.startsWith(folderPrefix) : true));
-
-    const tagPrefix = normalizeTagPrefix(this.settings.tagPrefix ?? DEFAULT_SETTINGS.tagPrefix);
-    const habitRegex = new RegExp(`${escapeRegExp(`#${tagPrefix}_`)}([^\\s#]+)(?:\\s+(\\d{1,2}:\\d{2}))?`, "gim");
-    const needle = options.habitKey.toLowerCase();
-
-    for (const file of files) {
-      const day = parseYMD(file.basename);
-      if (!day) continue;
-
-      const content = await this.app.vault.cachedRead(file);
-      if (!content) continue;
-
-      let match: RegExpExecArray | null;
-      while ((match = habitRegex.exec(content)) !== null) {
-        const key = match[1]?.trim().toLowerCase();
-        if (key !== needle) continue;
-
-        const timeRaw = match[2]?.trim() ?? "00:00";
-        const [hh, mm] = timeRaw.split(":").map((value) => parseInt(value, 10));
-        if (Number.isNaN(hh) || Number.isNaN(mm)) continue;
-
-        const timestamp = makeLocalDate(day.y, day.mo, day.d, hh, mm);
-        const iso = isoOf(day.y, day.mo, day.d);
-
-        countsByISO.set(iso, (countsByISO.get(iso) ?? 0) + 1);
-        hasByISO.add(iso);
-
-        const previous = lastTsByISO.get(iso);
-        if (!previous || timestamp > previous) {
-          lastTsByISO.set(iso, timestamp);
-        }
-      }
-    }
-
-    const baseThreshold = Number.isFinite(options.gracePeriodHours)
-      ? Math.max(1, Number(options.gracePeriodHours))
-      : clampPositive(this.settings.defaultGracePeriodHours, DEFAULT_SETTINGS.defaultGracePeriodHours);
-    const warningWindow = clampPositive(
-      options.warningWindowHours,
-      DEFAULT_SETTINGS.defaultWarningWindowHours,
-      0,
-    );
-    const allowedGapH = baseThreshold + warningWindow;
-    const allowedGapMs = allowedGapH * 3600000;
-
-    const dayTimestamps = sortDatesAscending(lastTsByISO.values());
-    const lastTs = dayTimestamps.length ? dayTimestamps[dayTimestamps.length - 1] : null;
-    const streak = computeStreakByDays(dayTimestamps, allowedGapMs);
-
-    return {
-      countsByISO,
-      hasByISO,
-      lastTsByISO,
-      lastTs,
-      streak,
-      allowedGapH,
-      allowedGapMs,
-      warningWindowHours: warningWindow,
-    };
   }
 
   private renderError(el: HTMLElement, message: string): void {
@@ -409,30 +200,133 @@ export default class HabitButtonPlugin extends Plugin {
     container.style.setProperty("--habit-dot-gap", `${options.dotGap}px`);
   }
 
+  private createStatsContext(tagPrefix: string) {
+    return {
+      vault: this.app.vault,
+      tagPrefix,
+      defaultGracePeriodHours: clampPositive(
+        this.settings.defaultGracePeriodHours,
+        DEFAULT_SETTINGS.defaultGracePeriodHours,
+      ),
+      defaultWarningWindowHours: clampPositive(
+        this.settings.defaultWarningWindowHours,
+        DEFAULT_SETTINGS.defaultWarningWindowHours,
+        0,
+      ),
+    } as const;
+  }
+
+  private registerGroupListener(group: string, listener: () => void): () => void {
+    return this.events.onGroup(group, listener);
+  }
+
+  private notifyGroupListeners(group?: string | null): void {
+    this.events.emitGroup(group ?? null);
+  }
+
+  private markPathStale(path: string): void {
+    if (!path) return;
+    this.stalePaths.add(path);
+    this.groupScanCache.delete(path);
+  }
+
+  private shouldScanPath(path: string, normalizedGroup: string, force: boolean): boolean {
+    if (force) return true;
+    if (this.stalePaths.has(path)) return true;
+    const groups = this.groupScanCache.get(path);
+    if (!groups) return true;
+    return !groups.has(normalizedGroup);
+  }
+
+  private markGroupScanFresh(path: string, normalizedGroup: string): void {
+    let groups = this.groupScanCache.get(path);
+    if (!groups) {
+      groups = new Set();
+      this.groupScanCache.set(path, groups);
+    }
+    groups.add(normalizedGroup);
+    this.stalePaths.delete(path);
+  }
+
+  private resolveSourcePath(candidate: string | undefined): string {
+    const trimmed = candidate?.trim();
+    if (trimmed && trimmed.length > 0) return trimmed;
+    this.anonymousSourceCounter += 1;
+    return `__unknown__/${this.anonymousSourceCounter}`;
+  }
+
+  private registerBlockCleanup(
+    el: HTMLElement,
+    ctx: MarkdownPostProcessorContext | undefined,
+    habitKey: string,
+    sourcePath: string,
+  ): void {
+    let disposed = false;
+    const dispose = () => {
+      if (disposed) return;
+      disposed = true;
+      const removed = this.registry.remove(habitKey, sourcePath);
+      this.notifyGroupListeners(removed?.group);
+    };
+
+    if (ctx && typeof ctx.addChild === "function") {
+      ctx.addChild(new DisposableRenderChild(el, dispose));
+    }
+
+    this.register(() => dispose());
+  }
+
   private renderHabitButton(
     source: string,
     el: HTMLElement,
-    _ctx: MarkdownPostProcessorContext,
+    ctx: MarkdownPostProcessorContext,
   ): void {
-    const blockOptions = this.parseBlock(source);
-    const options = this.resolveOptions(blockOptions);
+    const blockOptions = parseHabitBlock(source);
+    const options = resolveHabitOptions(blockOptions, {
+      settings: this.settings,
+      defaults: DEFAULT_SETTINGS,
+    });
 
     if (!options) {
       this.renderError(el, t("ui.errorNoTitle"));
       return;
     }
 
-    void this.mountHabitButton(el, options);
+    const effectiveBorder =
+      typeof blockOptions.border === "boolean" ? blockOptions.border : this.settings.defaultBorder;
+    options.border = effectiveBorder;
+
+    const sourcePath = this.resolveSourcePath(ctx?.sourcePath);
+    this.registerBlockCleanup(el, ctx, options.habitKey, sourcePath);
+
+    void this.mountHabitButton(el, options, { sourcePath });
   }
 
-  private async mountHabitButton(el: HTMLElement, options: ResolvedHabitOptions): Promise<void> {
-    const stats = await this.collectHabitStats(options);
+  private async mountHabitButton(
+    el: HTMLElement,
+    options: ResolvedHabitOptions,
+    context: { sourcePath: string },
+  ): Promise<void> {
+    const stats = await collectHabitStats(options, this.createStatsContext(options.tagPrefix));
+
+    const firstUpsert = this.registry.upsert({
+      habitKey: options.habitKey,
+      group: options.group,
+      sourcePath: context.sourcePath,
+      options,
+      stats: cloneHabitStats(stats),
+    });
+    if (firstUpsert.changed) {
+      this.notifyGroupListeners(firstUpsert.record.group);
+    }
 
     el.empty();
     const card = el.createDiv({ cls: "dv-habit-card" });
+    card.classList.toggle("has-border", options.border !== false);
+    card.classList.toggle("is-borderless", options.border === false);
     const iconBtn = card.createEl("button", {
       cls: "dv-habit-iconbtn",
-      text: options.icon || "✅",
+      text: options.icon || "□",
       attr: { title: t("ui.markHabit", options.normalizedTitle) },
     });
 
@@ -455,6 +349,7 @@ export default class HabitButtonPlugin extends Plugin {
       meta: { lastEl, streakEl },
       card,
       iconBtn,
+      sourcePath: context.sourcePath,
     };
 
     const renderHeat = () => {
@@ -477,10 +372,11 @@ export default class HabitButtonPlugin extends Plugin {
         : Infinity;
       const isStreakBroken = hasLastMark && !isStreakAlive;
       const warnWindow = currentStats.warningWindowHours;
-      const shouldWarn =
-        (isStreakAlive && remainingHours > 0 && remainingHours <= warnWindow) ||
-        (isStreakBroken && Number.isFinite(hoursSinceLast));
-      lastElement.classList.toggle("is-overdue", shouldWarn);
+      const hasFiniteRemaining = Number.isFinite(remainingHours);
+      const withinWarningWindow = hasFiniteRemaining && remainingHours > 0 && remainingHours <= warnWindow;
+      const pastAllowedGap = hasFiniteRemaining && remainingHours <= 0;
+      const shouldMarkOverdue = pastAllowedGap || (isStreakBroken && Number.isFinite(hoursSinceLast));
+      lastElement.classList.toggle("is-overdue", shouldMarkOverdue);
 
       const streakText =
         currentStats.streak > 0
@@ -490,7 +386,7 @@ export default class HabitButtonPlugin extends Plugin {
       streakElement.classList.toggle("is-zero", currentStats.streak === 0);
 
       const remH = remainingHours;
-      if (currentStats.streak > 0 && remH > 0 && remH <= warnWindow) {
+      if (currentStats.streak > 0 && withinWarningWindow) {
         const hint = streakElement.createSpan({ cls: "time-left" });
         const hrs = Math.ceil(remH);
         hint.textContent = ` ${t("overdue.label", hrs)}`;
@@ -533,12 +429,388 @@ export default class HabitButtonPlugin extends Plugin {
         state.stats.lastTs = sorted.length ? sorted[sorted.length - 1] : null;
         state.stats.streak = computeStreakByDays(sorted, state.stats.allowedGapMs);
 
+        const update = this.registry.upsert({
+          habitKey: options.habitKey,
+          group: options.group,
+          sourcePath: state.sourcePath,
+          options,
+          stats: cloneHabitStats(state.stats),
+        });
+        if (update.changed) {
+          this.notifyGroupListeners(update.record.group);
+        }
+
         refresh();
       } catch (error) {
         console.error("[habit-button] append error", error);
         new Notice(t("ui.noticeError"), 4000);
       }
     });
+  }
+
+  private parseHabitGroupBlock(source: string): HabitGroupBlockOptions {
+    const trimmed = source.trim();
+    if (!trimmed) return {};
+    try {
+      const parsed = parseYaml(trimmed);
+      if (!parsed || typeof parsed !== "object") return {};
+      const data = parsed as Record<string, unknown>;
+      const toStringArray = (value: unknown): string[] | undefined => {
+        if (Array.isArray(value)) {
+          const list = value
+            .map((entry) => (typeof entry === "string" ? entry : entry != null ? String(entry) : ""))
+            .map((entry) => entry.trim())
+            .filter((entry) => entry.length > 0);
+          return list.length ? list : undefined;
+        }
+        if (typeof value === "string") {
+          const trimmedValue = value.trim();
+          return trimmedValue ? [trimmedValue] : undefined;
+        }
+        return undefined;
+      };
+
+      return {
+        title: typeof data.title === "string" ? data.title : undefined,
+        group: typeof data.group === "string" ? data.group : undefined,
+        habitsLocations: toStringArray(data.habitsLocations),
+        border: typeof data.border === "boolean" ? data.border : undefined,
+        icon: typeof data.icon === "string" ? data.icon : undefined,
+      };
+    } catch (error) {
+      console.warn("Habit Group: failed to parse block", error);
+      return {};
+    }
+  }
+
+  private async renderHabitGroup(
+    source: string,
+    el: HTMLElement,
+    ctx: MarkdownPostProcessorContext,
+  ): Promise<void> {
+    const rawOptions = this.parseHabitGroupBlock(source);
+    const groupRaw = rawOptions.group?.trim();
+    if (!groupRaw) {
+      this.renderError(el, t("ui.errorGroupMissing"));
+      return;
+    }
+
+    const groupLabel = rawOptions.title?.trim() || capitalizeFirst(groupRaw);
+    const groupIcon = rawOptions.icon?.trim();
+    const normalizedGroup = groupRaw.trim().toLowerCase();
+    const sourcePath = this.resolveSourcePath(ctx?.sourcePath);
+
+    el.empty();
+    const container = el.createDiv({ cls: "dv-habit-group" });
+    const borderEnabled =
+      typeof rawOptions.border === "boolean" ? rawOptions.border : this.settings.defaultBorder;
+    container.classList.toggle("has-border", borderEnabled);
+    container.classList.toggle("is-borderless", !borderEnabled);
+
+    const render = async () => {
+      container.empty();
+
+      const layout = container.createDiv({ cls: "dv-habit-group-layout" });
+      if (groupIcon) {
+        layout.createDiv({ cls: "dv-habit-group-icon", text: groupIcon });
+      }
+      layout.createDiv({ cls: "dv-habit-group-title", text: groupLabel });
+      const aggregateHost = layout.createDiv({ cls: "dv-habit-group-aggregate" });
+      const barHost = layout.createDiv({ cls: "dv-habit-group-bar" });
+      const captionHost = layout.createDiv({ cls: "dv-habit-group-caption" });
+
+      let records = this.registry.getByGroup(groupRaw);
+      const locations = this.resolveHabitGroupLocations(rawOptions, sourcePath);
+      const hasExplicitLocations = Boolean(rawOptions.habitsLocations?.length);
+      const needsScan = hasExplicitLocations || records.length === 0;
+
+      if (needsScan && locations.length) {
+        await this.scanHabitGroupLocations(
+          groupRaw,
+          normalizedGroup,
+          locations,
+          hasExplicitLocations,
+        );
+        records = this.registry.getByGroup(groupRaw);
+      }
+
+      const duplicates = this.collectGroupDuplicates(normalizedGroup);
+      if (duplicates.length > 0) {
+        this.renderGroupDuplicates(container, duplicates, sourcePath);
+        return;
+      }
+
+      if (records.length === 0) {
+        const message = hasExplicitLocations ? t("group.emptyEager") : t("group.emptyPassive");
+        container.createDiv({ cls: "dv-habit-group-empty", text: message });
+        return;
+      }
+
+      this.renderGroupSummary({ aggregate: aggregateHost, bar: barHost, caption: captionHost }, records);
+    };
+
+    await render();
+
+    const unregister = this.registerGroupListener(groupRaw, () => {
+      void render();
+    });
+
+    const cleanup = new DisposableRenderChild(container, () => unregister());
+    if (ctx && typeof ctx.addChild === "function") {
+      ctx.addChild(cleanup);
+    } else {
+      cleanup.onload();
+      this.register(() => cleanup.onunload());
+    }
+  }
+
+  private resolveHabitGroupLocations(
+    options: HabitGroupBlockOptions,
+    fallbackPath: string,
+  ): string[] {
+    const unique = new Set<string>();
+    const push = (value: string | undefined) => {
+      if (!value) return;
+      const trimmed = trimSlashes(value.trim());
+      if (trimmed) unique.add(trimmed);
+    };
+
+    if (options.habitsLocations?.length) {
+      for (const item of options.habitsLocations) {
+        push(item);
+      }
+    } else if (!fallbackPath.startsWith("__unknown__")) {
+      push(fallbackPath);
+    }
+
+    return Array.from(unique);
+  }
+
+  private async scanHabitGroupLocations(
+    groupRaw: string,
+    normalizedGroup: string,
+    locations: string[],
+    force: boolean,
+  ): Promise<void> {
+    const markdownFiles = this.app.vault.getMarkdownFiles();
+    const filesByPath = new Map(markdownFiles.map((file) => [file.path, file] as const));
+
+    for (const location of locations) {
+      const resolvedPaths = this.resolveLocationPaths(location, markdownFiles);
+      for (const path of resolvedPaths) {
+        const file = filesByPath.get(path);
+        if (!file) continue;
+        if (!this.shouldScanPath(file.path, normalizedGroup, force)) continue;
+        await this.scanHabitFileForGroup(file, groupRaw, normalizedGroup);
+      }
+    }
+  }
+
+  private resolveLocationPaths(location: string, markdownFiles: TFile[]): string[] {
+    const normalized = trimSlashes(location);
+    if (!normalized) return [];
+
+    const directChildren = markdownFiles
+      .filter((file) => {
+        if (!file.path.startsWith(`${normalized}/`)) return false;
+        const rest = file.path.slice(normalized.length + 1);
+        return rest.length > 0 && !rest.includes("/");
+      })
+      .map((file) => file.path);
+    if (directChildren.length) return directChildren;
+
+    const exact = markdownFiles.find((file) => file.path === normalized);
+    if (exact) return [exact.path];
+
+    const withMd = markdownFiles.find((file) => file.path === `${normalized}.md`);
+    if (withMd) return [withMd.path];
+
+    const dotIndex = normalized.lastIndexOf(".");
+    const hasExtension = dotIndex > normalized.lastIndexOf("/");
+    if (!hasExtension) {
+      const alternatives = markdownFiles
+        .filter((file) => file.path.startsWith(`${normalized}.`))
+        .sort((a, b) => a.path.localeCompare(b.path));
+      if (alternatives.length) {
+        return [alternatives[0].path];
+      }
+    }
+
+    return [];
+  }
+
+  private async scanHabitFileForGroup(
+    file: TFile,
+    groupRaw: string,
+    normalizedGroup: string,
+  ): Promise<void> {
+    const content = await this.app.vault.cachedRead(file);
+    const blocks = this.extractHabitButtonBlocks(content ?? "");
+    if (!blocks.length) {
+      const removed = this.registry.pruneSourceRecords(file.path, groupRaw, new Set());
+      for (const record of removed) {
+        this.notifyGroupListeners(record.group);
+      }
+      this.markGroupScanFresh(file.path, normalizedGroup);
+      return;
+    }
+
+    const keep = new Set<string>();
+    for (const block of blocks) {
+      const rawOptions = parseHabitBlock(block);
+      const resolved = resolveHabitOptions(rawOptions, {
+        settings: this.settings,
+        defaults: DEFAULT_SETTINGS,
+      });
+      if (!resolved) continue;
+      const blockGroup = resolved.group?.trim().toLowerCase();
+      if (!blockGroup || blockGroup !== normalizedGroup) continue;
+
+      keep.add(resolved.habitKey);
+      const stats = await collectHabitStats(resolved, this.createStatsContext(resolved.tagPrefix));
+      const result = this.registry.upsert({
+        habitKey: resolved.habitKey,
+        group: resolved.group ?? groupRaw,
+        sourcePath: file.path,
+        options: resolved,
+        stats: cloneHabitStats(stats),
+      });
+      if (result.changed) {
+        this.notifyGroupListeners(result.record.group);
+      }
+    }
+
+    const removed = this.registry.pruneSourceRecords(file.path, groupRaw, keep);
+    for (const record of removed) {
+      this.notifyGroupListeners(record.group);
+    }
+    this.markGroupScanFresh(file.path, normalizedGroup);
+  }
+
+  private extractHabitButtonBlocks(content: string): string[] {
+    if (!content) return [];
+    const pattern = /```habit-button[^\n]*\n([\s\S]*?)```/g;
+    const blocks: string[] = [];
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(content)) !== null) {
+      const body = match[1]?.trim() ?? "";
+      if (body) blocks.push(body);
+    }
+    return blocks;
+  }
+
+  private collectGroupDuplicates(
+    normalizedGroup: string,
+  ): Array<{ habitKey: string; records: HabitRegistryRecord[] }> {
+    const duplicates: Array<{ habitKey: string; records: HabitRegistryRecord[] }> = [];
+    const map = this.registry.getDuplicates();
+    for (const [habitKey, records] of map.entries()) {
+      const scoped = records.filter((record) => (record.group ?? "").trim().toLowerCase() === normalizedGroup);
+      if (scoped.length > 1) {
+        duplicates.push({ habitKey, records: scoped });
+      }
+    }
+    return duplicates;
+  }
+
+  private renderGroupSummary(
+    hosts: { aggregate: HTMLElement; bar: HTMLElement; caption: HTMLElement },
+    records: HabitRegistryRecord[],
+  ): void {
+    const { aggregate, bar, caption } = hosts;
+    aggregate.empty();
+    bar.empty();
+    caption.empty();
+    const now = Date.now();
+    const byState = records.map((record) => ({
+      record,
+      state: this.classifyGroupHabit(record, now),
+      title: record.options.normalizedTitle?.toLowerCase() ?? record.habitKey.toLowerCase(),
+    }));
+    const priority: Record<GroupSegmentState, number> = { emerald: 0, amber: 1, gray: 2 };
+    byState.sort((a, b) => {
+      const order = priority[a.state] - priority[b.state];
+      if (order !== 0) return order;
+      return a.title.localeCompare(b.title);
+    });
+
+    const total = byState.length;
+    const activeCount = byState.filter((entry) => entry.state !== "gray").length;
+    const label = aggregate.createDiv({
+      cls: "dv-habit-group-summary-label",
+      text: `${activeCount}/${total}`,
+    });
+    if (total === 0) label.classList.add("is-empty");
+    else if (activeCount === total) label.classList.add("is-emerald");
+    else label.classList.add("is-amber");
+
+    const progress = bar.createDiv({ cls: "dv-habit-group-progress" });
+    if (total === 0) {
+      progress.classList.add("is-empty");
+    } else {
+      for (const entry of byState) {
+        progress.createDiv({
+          cls: `dv-habit-group-segment is-${entry.state}`,
+          attr: { title: entry.record.options.normalizedTitle ?? entry.record.habitKey },
+        });
+      }
+    }
+    caption.textContent = t("group.summaryCaption");
+  }
+
+  private classifyGroupHabit(record: HabitRegistryRecord, now: number): GroupSegmentState {
+    const { stats } = record;
+    if (stats.streak <= 0 || !stats.lastTs) return "gray";
+
+    const hoursSinceLast = (now - stats.lastTs.getTime()) / 3600000;
+    if (!Number.isFinite(hoursSinceLast) || hoursSinceLast < 0) return "gray";
+
+    const remaining = stats.allowedGapH - hoursSinceLast;
+    if (!Number.isFinite(remaining) || remaining <= 0) return "gray";
+
+    const warnWindow = Math.max(0, stats.warningWindowHours);
+    if (warnWindow > 0 && remaining <= warnWindow) {
+      return "amber";
+    }
+
+    return "emerald";
+  }
+
+  private renderGroupDuplicates(
+    container: HTMLElement,
+    duplicates: Array<{ habitKey: string; records: HabitRegistryRecord[] }>,
+    sourcePath: string,
+  ): void {
+    const warning = container.createDiv({ cls: "dv-habit-group-duplicates" });
+    warning.createDiv({ text: t("group.duplicatesHeading") });
+    const list = warning.createEl("ul");
+    for (const duplicate of duplicates) {
+      const item = list.createEl("li");
+      const displayName = duplicate.records[0]?.options.normalizedTitle ?? duplicate.habitKey;
+      item.createSpan({ text: `${displayName}: ` });
+      duplicate.records.forEach((record, index) => {
+        const link = item.createEl("a", {
+          cls: "dv-habit-group-link",
+          text: record.sourcePath,
+          attr: { href: "#" },
+        });
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          this.openPath(record.sourcePath, sourcePath);
+        });
+        if (index < duplicate.records.length - 1) {
+          item.appendChild(document.createTextNode(", "));
+        }
+      });
+    }
+  }
+
+  private openPath(target: string, from: string): void {
+    const { workspace } = this.app;
+    const openLinkText = workspace?.openLinkText?.bind(workspace);
+    if (openLinkText) {
+      void openLinkText(target, from, false);
+    }
   }
 
   private renderHeatRow(state: {
@@ -613,17 +885,14 @@ export default class HabitButtonPlugin extends Plugin {
 
   private async logHabitEntry(options: ResolvedHabitOptions): Promise<Date | null> {
     const now = new Date();
-    const yyyy = now.getFullYear();
-    const mm = pad2(now.getMonth() + 1);
-    const dd = pad2(now.getDate());
-    const fileName = `${yyyy}-${mm}-${dd}.md`;
+    const fileName = `${formatDailyNoteName(now, options.dailyNoteFormat)}.md`;
     const folder = trimSlashes(options.dailyFolder);
     const path = folder ? `${folder}/${fileName}` : fileName;
 
     const habitLine = `\n- ${options.habitTag} ${nowHHMM(now)}\n`;
-    let file = this.app.vault.getAbstractFileByPath(path) as TFile | null;
+    const existing = this.app.vault.getAbstractFileByPath(path);
 
-    if (!file) {
+    if (!(existing instanceof TFile)) {
       let templateContent = "";
       if (options.templatePath) {
         const templateFile = this.app.vault.getAbstractFileByPath(options.templatePath);
@@ -643,10 +912,11 @@ export default class HabitButtonPlugin extends Plugin {
       }
 
       await this.app.vault.create(path, `${templateContent}${habitLine}`);
-      file = this.app.vault.getAbstractFileByPath(path) as TFile | null;
     } else {
-      await this.app.vault.append(file, habitLine);
+      await this.app.vault.append(existing, habitLine);
     }
+
+    this.markPathStale(path);
 
     new Notice(t("ui.noticeAdded", options.normalizedTitle));
     return now;
@@ -658,5 +928,18 @@ export default class HabitButtonPlugin extends Plugin {
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
+  }
+}
+
+class DisposableRenderChild extends MarkdownRenderChild {
+  private dispose: () => void;
+
+  constructor(containerEl: HTMLElement, dispose: () => void) {
+    super(containerEl);
+    this.dispose = dispose;
+  }
+
+  onunload(): void {
+    this.dispose();
   }
 }

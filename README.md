@@ -1,94 +1,102 @@
-# Obsidian Habit Tracking — habit-button.js
+# Obsidian Habit Button
 
-A tiny DataviewJS widget for Obsidian: a habit card with a one‑click button, streak counter, and heatmap (grid/row). On click, it appends a line to the daily note and updates the visualization.
+This plugin lets you track your habits in a single tap. Features like streaks and heatmaps will help you staying motivated, while grace and warning periods will allow you to stay flexible within your timeline.
 
-![Demo](assets/canvas-demo.png "How the widget looks in canvas")
+You can drop in your habit buttons anywhere including Canvas. To not lose the focus on lots of habits, there are groups that provide a quick status.
 
-## Requirements
+## Demo
 
-- Obsidian (the script uses `app.vault` and `Notice`).
-- Dataview plugin enabled.
+### Habit Button
+
+- render a tap-to-log habit card with streak, heatmap, and overdue hints
+- supports per-block icons, grace periods, and granular layouts
+
+![Habit button demo](assets/habit-button-demo.gif)
+
+### Habit Group
+
+- aggregate multiple habits into a summarized status bar
+- highlight streak health with ordered emerald/amber/gray segments
+
+![Habit group demo](assets/habit-group-demo.gif)
+
+### Canvas Mashup
+
+- mix and match buttons and groups on an Obsidian Canvas for quick daily reviews
+
+[Habit canvas editing](https://youtu.be/pUQ5l1xv338)
+
+### Settings
+
+- change the default behavior of the buttons and groups
+- change the language
+
+[Settings overview](https://youtu.be/9IViUkCg94M)
+
+### Your daily notes
+
+All the habit information is stored in your daily notes
+
+![Your daily note content](assets/note-content.png)
 
 ## Installation
 
-1. Copy `habit-button.js` into your vault. Recommended path: `meta/dv/habit-button.js`.
-2. Insert a DataviewJS code block in the target note and call the view:
+At the moment, the plugin is not available on the marketplace. It's still in review: <https://github.com/obsidianmd/obsidian-releases/pull/8087>
 
-```dataviewjs
-await dv.view("meta/dv/habit-button", {
-  title: "Creatine",
-  gracePeriodHours: 16,
-  icon: "💪",
-  heatLayout: "row",   // "grid" or "row"
-  days: 26              // for row; for grid use weeks
-});
+~~To use the plugin simply install it from the Obsidian marketplace.~~
+
+## Usage
+
+There are commands which you can invoke to paste the ready blocks into your note
+
+![Commands demo](assets/commands-demo.png)
+
+### Habit Button block
+
+Use a fenced code block with language `habit-button` (please remove "\\" before `):
+
+```markdown
+\```habit-button
+title: Morning Stretch
+icon: ☀️
+group: health
+\```
 ```
 
-The path in `dv.view("…")` should point to the file without the `.js` extension, relative to the vault root.
+![morning stretch](assets/morning-stretch.png)
 
-## What it does
+### Habit Group block
 
-- On click, writes a line to today’s daily file: `- #habit_<key> HH:MM`.
-- By default, daily files are looked up/created in the `daily` folder as `YYYY-MM-DD.md`.
-- The habit key is derived from `title`: lowercased, spaces → `_`, non‑letter/digit/underscore removed, consecutive underscores collapsed.
-- The streak is calculated by unique days with an allowed gap of `gracePeriodHours + warningWindowHours` (defaults to `defaultGracePeriodHours + defaultWarningWindowHours = 24h + 24h`).
-- Visualization: a heatmap by days (`row`) or by weeks (`grid`), with the newest days/weeks on the right.
+Summarize related habits with a `habit-group` block:
 
-## Parameters (input)
-
-- `title` (string, required): habit title.
-- `icon` (string, optional): emoji on the button (defaults to ✅).
-- `gracePeriodHours` (number, optional): hours without a mark before the streak breaks. Added to `warningWindowHours` (or the `defaultWarningWindowHours` setting when omitted) to determine the warning window.
-- `dailyFolder` (string, optional): folder for daily notes. Defaults to `"daily"`.
-- Heatmap:
-  - `heatLayout`: `"grid"` or `"row"` (defaults to `"grid"`).
-  - For `grid`: `weeks` (number of weeks, defaults to 26).
-  - For `row`: `days` (number of days, defaults to 240).
-- Sizing (optional): `cellSize`, `cellGap` (for grid), `dotSize`, `dotGap` (for row).
-
-## Examples
-
-A card with a row heatmap and a 16h warning threshold:
-
-```dataviewjs
-await dv.view("meta/dv/habit-button", {
-  title: "Creatine",
-  gracePeriodHours: 16,
-  icon: "💪",
-  heatLayout: "row",
-  days: 26
-});
+```markdown
+\```habit-group
+title: My health
+group: health
+icon: ❤️
+\```
 ```
 
-A weekly grid without extra parameters (26 weeks by default):
+![My health group](assets/my-health-group.png)
 
-```dataviewjs
-await dv.view("meta/dv/habit-button", {
-  title: "Walk the dog 🐶",
-  gracePeriodHours: 16,
-  icon: "🦮",
-  heatLayout: "grid"
-});
-```
+Groups read live data from the habit registry. When you provide `habitsLocations`, the block eagerly rescans those notes on each render; without it, the group relies on cached registry updates from embedded habit buttons.
 
-A rarer habit with a larger threshold:
+### Canvas placement
 
-```dataviewjs
-await dv.view("meta/dv/habit-button", {
-  title: "Call mom",
-  gracePeriodHours: 24 * 6,
-  icon: "☎️"
-});
-```
+Drag the rendered blocks onto a Canvas or embed them via copy/paste. The plugin keeps stats in sync, so the Canvas view updates automatically when you mark a habit done elsewhere.
 
-## Notes
+![Canvas placement](assets/canvas-placement.png)
 
-- If today’s daily file doesn’t exist, it will be created automatically with the heading `# YYYY-MM-DD`.
-- In `grid`, future days are visually hidden (transparent) — the current day remains visible.
-- The “<Nh 🔥” hint appears when roughly less than a day remains before the streak would break.
-- The script is intended to run inside Obsidian (DataviewJS); it won’t run standalone in a browser/Node.
+## Features
 
-## Repository structure
+- **One-tap logging with history-aware streaks** — click the button to append a timestamped entry, update the streak, and repaint the heatmap instantly.
 
-- `habit-button.js` — the widget itself.
-- `README.md` — this description and examples.
+- **Adaptive warnings and styled progress** — warning windows render amber striped segments, while active habits stay emerald and inactive habits gray.
+
+- **Habit groups with progress bar** — see emerald (healthy), amber (warning), and gray (stalled) habits aligned in a single progress bar and aggregate counter.
+
+- **Canvas-ready layout** — combine multiple cards and groups into dashboards, drag them around, and keep everything synchronized with your vault data.
+
+## Known Issues
+
+- The cards are not up to date if the notes were updated in the background. To refresh the cards, reopen the note or the canvas (you can switch to a different note and back)

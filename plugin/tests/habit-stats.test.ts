@@ -76,6 +76,23 @@ describe("habit stats computations", () => {
     expect(button?.classList.contains("is-done")).toBe(false);
   });
 
+  it("parses nested daily notes using custom format", async () => {
+    // given
+    const plugin = await bootstrapPlugin({
+      dailyFolder: "daily",
+      dailyNoteFormat: "YYYY/MMMM/DD",
+    });
+    plugin.vault.files.set("daily/2024/June/15.md", "- #habit_focus 09:00\n");
+    const habitDefinition = buildHabitDefinition({ title: "Focus" });
+
+    // when
+    const container = await renderHabit(plugin, habitDefinition);
+
+    // then
+    const button = container.querySelector<HTMLButtonElement>(".dv-habit-iconbtn");
+    expect(button?.classList.contains("is-done")).toBe(true);
+  });
+
   it("combines grace period and warning window from settings when block omits override", async () => {
     // given
     const plugin = await bootstrapPlugin({

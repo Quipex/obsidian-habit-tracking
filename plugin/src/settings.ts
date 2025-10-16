@@ -3,8 +3,11 @@ import HabitButtonPlugin from "./main";
 import { t } from "./i18n";
 import type { LocalePreference } from "./i18n";
 
+export const DEFAULT_DAILY_NOTE_FORMAT = "YYYY-MM-DD";
+
 export interface HabitButtonSettings {
   dailyFolder: string;
+  dailyNoteFormat: string;
   defaultLayout: "grid" | "row";
   weeks: number;
   days: number;
@@ -18,10 +21,12 @@ export interface HabitButtonSettings {
   defaultGracePeriodHours: number;
   defaultWarningWindowHours: number;
   weekStart: "monday" | "sunday";
+  defaultBorder: boolean;
 }
 
 export const DEFAULT_SETTINGS: HabitButtonSettings = {
   dailyFolder: "daily",
+  dailyNoteFormat: DEFAULT_DAILY_NOTE_FORMAT,
   defaultLayout: "grid",
   weeks: 26,
   days: 30,
@@ -35,6 +40,7 @@ export const DEFAULT_SETTINGS: HabitButtonSettings = {
   defaultGracePeriodHours: 24,
   defaultWarningWindowHours: 24,
   weekStart: "monday",
+  defaultBorder: true,
 };
 
 export class HabitButtonSettingTab extends PluginSettingTab {
@@ -151,11 +157,12 @@ export class HabitButtonSettingTab extends PluginSettingTab {
             auto: t("settings.language.options.auto"),
             en: t("settings.language.options.en"),
             ru: t("settings.language.options.ru"),
+            ua: t("settings.language.options.ua"),
           })
           .setValue(this.plugin.settings.locale)
-          .onChange(async (value: LocalePreference) => {
-            if (value === "auto" || value === "en" || value === "ru") {
-              this.plugin.settings.locale = value;
+          .onChange(async (value) => {
+            if (value === "auto" || value === "en" || value === "ru" || value === "ua") {
+              this.plugin.settings.locale = value as LocalePreference;
               await this.plugin.saveSettings();
               this.plugin.refreshLocale();
               this.display();
@@ -177,6 +184,19 @@ export class HabitButtonSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
+      .setName(t("settings.dailyNoteFormat.label"))
+      .setDesc(t("settings.dailyNoteFormat.desc"))
+      .addText((text) =>
+        text
+          .setPlaceholder(DEFAULT_DAILY_NOTE_FORMAT)
+          .setValue(this.plugin.settings.dailyNoteFormat || DEFAULT_DAILY_NOTE_FORMAT)
+          .onChange(async (value: string) => {
+            this.plugin.settings.dailyNoteFormat = value.trim() || DEFAULT_DAILY_NOTE_FORMAT;
+            await this.plugin.saveSettings();
+          }),
+      );
+
+    new Setting(containerEl)
       .setName(t("settings.templatePath.label"))
       .setDesc(t("settings.templatePath.desc"))
       .addText((text) =>
@@ -189,6 +209,18 @@ export class HabitButtonSettingTab extends PluginSettingTab {
           }),
       );
 
+    new Setting(containerEl)
+      .setName(t("settings.border.label"))
+      .setDesc(t("settings.border.desc"))
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.settings.defaultBorder)
+          .onChange(async (value) => {
+            this.plugin.settings.defaultBorder = value;
+            await this.plugin.saveSettings();
+          }),
+      );
+
     containerEl.createEl("h3", { text: t("settings.dimensions.heading") });
 
     addSliderWithNumber(
@@ -197,7 +229,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.dimensions.cellSize.desc")),
       {
         min: 1,
-        max: 100,
+        max: 30,
         value: this.plugin.settings.defaultCellSize,
         onChange: async (value) => {
           this.plugin.settings.defaultCellSize = value;
@@ -212,7 +244,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.dimensions.cellGap.desc")),
       {
         min: 0,
-        max: 20,
+        max: 10,
         value: this.plugin.settings.defaultCellGap,
         onChange: async (value) => {
           this.plugin.settings.defaultCellGap = value;
@@ -227,7 +259,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.dimensions.dotSize.desc")),
       {
         min: 1,
-        max: 100,
+        max: 30,
         value: this.plugin.settings.defaultDotSize,
         onChange: async (value) => {
           this.plugin.settings.defaultDotSize = value;
@@ -242,7 +274,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.dimensions.dotGap.desc")),
       {
         min: 0,
-        max: 20,
+        max: 10,
         value: this.plugin.settings.defaultDotGap,
         onChange: async (value) => {
           this.plugin.settings.defaultDotGap = value;
@@ -273,6 +305,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.gracePeriod.desc")),
       {
         min: 0,
+        max: 8760,
         value: this.plugin.settings.defaultGracePeriodHours,
         onChange: async (value) => {
           this.plugin.settings.defaultGracePeriodHours = value;
@@ -287,6 +320,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.warnWindow.desc")),
       {
         min: 0,
+        max: 8760,
         value: this.plugin.settings.defaultWarningWindowHours,
         onChange: async (value) => {
           this.plugin.settings.defaultWarningWindowHours = value;
@@ -305,7 +339,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
             sunday: t("settings.weekStart.options.sunday"),
           })
           .setValue(this.plugin.settings.weekStart)
-          .onChange(async (value: "monday" | "sunday") => {
+          .onChange(async (value) => {
             if (value === "monday" || value === "sunday") {
               this.plugin.settings.weekStart = value;
               await this.plugin.saveSettings();
@@ -320,7 +354,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         dropdown
           .addOptions({ grid: t("settings.defaultLayout.options.grid"), row: t("settings.defaultLayout.options.row") })
           .setValue(this.plugin.settings.defaultLayout)
-          .onChange(async (value: "grid" | "row") => {
+          .onChange(async (value) => {
             if (value === "grid" || value === "row") {
               this.plugin.settings.defaultLayout = value;
               await this.plugin.saveSettings();
@@ -334,6 +368,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.gridWeeks.desc")),
       {
         min: 1,
+        max: 52,
         value: this.plugin.settings.weeks,
         onChange: async (value) => {
           this.plugin.settings.weeks = value;
@@ -348,6 +383,7 @@ export class HabitButtonSettingTab extends PluginSettingTab {
         .setDesc(t("settings.rowDays.desc")),
       {
         min: 1,
+        max: 62,
         value: this.plugin.settings.days,
         onChange: async (value) => {
           this.plugin.settings.days = value;

@@ -1,24 +1,23 @@
 {
   "name": "habit-button",
-  "version": "0.1.0",
+  "version": "1.1.3",
   "description": "Habit Button Obsidian plugin",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs --watch",
     "build": "node esbuild.config.mjs",
     "deploy:test": "npm run build && node scripts/sync-test-vault.mjs",
-    "test:functional": "vitest run"
+    "test:functional": "vitest run",
+    "version": "node scripts/update-manifest-version.mjs"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
     "esbuild": "^0.19.12",
     "jsdom": "^27.0.0",
+    "moment": "^2.29.4",
     "obsidian": "latest",
     "typescript": "^5.4.5",
     "vitest": "^3.2.4",
     "yaml": "^2.8.1"
-  },
-  "dependencies": {
-    "tiny-i18n": "^2.0.4"
   }
 }

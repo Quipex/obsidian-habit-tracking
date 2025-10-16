@@ -1,9 +1,22 @@
 .dv-habit-card {
+  --emerald: #059669;
+  --amber: #b45309;
   display: flex;
   align-items: flex-start;
-  background: var(--background-primary);
-  border-radius: 16px;
   transition: opacity 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.dv-habit-card.has-border {
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.dv-habit-card.is-borderless {
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
 .dv-habit-card.is-done {
@@ -62,7 +75,7 @@
 }
 
 .dv-habit-meta .last.is-overdue {
-  color: #b45309;
+  color: var(--amber);
   font-weight: 600;
 }
 
@@ -71,7 +84,7 @@
 }
 
 .dv-habit-meta .streak {
-  color: #059669;
+  color: var(--emerald);
   font-weight: 600;
 }
 
@@ -80,7 +93,7 @@
 }
 
 .dv-habit-meta .streak .time-left {
-  color: #b45309;
+  color: var(--amber);
   font-weight: 600;
 }
 
@@ -159,4 +172,157 @@
 
 .dv-habit-card li::marker {
   content: "" !important;
+}
+
+.dv-habit-group {
+  --emerald: #059669;
+  --amber: #b45309;
+  --gray: var(--background-modifier-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+
+.dv-habit-group.has-border {
+  padding: 16px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 16px;
+}
+
+.dv-habit-group.is-borderless {
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+.dv-habit-group-layout {
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  grid-template-rows: min-content 1fr min-content min-content;
+  grid-template-areas:
+    "icon title"
+    "icon aggregate"
+    "icon bar"
+    "icon caption";
+  row-gap: 8px;
+  align-items: center;
+}
+
+.dv-habit-group-icon {
+  grid-area: icon;
+  font-size: 4.5em;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: baseline;
+  margin-right: 16px;
+}
+
+.dv-habit-group-title {
+  grid-area: title;
+  font-weight: 600;
+  font-size: 1.5em;
+  line-height: 1;
+}
+
+.dv-habit-group-aggregate {
+  grid-area: aggregate;
+  display: flex;
+  align-items: flex-end;
+}
+
+.dv-habit-group-summary-label {
+  font-size: 2.6em;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  margin-bottom: 3px;
+}
+
+.dv-habit-group-summary-label.is-emerald {
+  color: var(--emerald);
+}
+
+.dv-habit-group-summary-label.is-amber {
+  color: var(--amber);
+}
+
+.dv-habit-group-summary-label.is-empty {
+  color: var(--text-muted);
+}
+
+.dv-habit-group-bar {
+  grid-area: bar;
+}
+
+.dv-habit-group-caption {
+  grid-area: caption;
+  color: var(--text-muted);
+  font-size: 0.9em;
+  text-align: left;
+}
+
+.dv-habit-group-progress {
+  height: 9px;
+  border-radius: 999px;
+  background: var(--background-modifier-border);
+  overflow: hidden;
+  min-width: 120px;
+  display: flex;
+}
+
+.dv-habit-group-progress.is-empty {
+  background: var(--background-modifier-border);
+}
+
+.dv-habit-group-segment {
+  flex: 1;
+  height: 100%;
+  transition: background 0.2s ease;
+}
+
+.dv-habit-group-segment.is-emerald {
+  background: var(--emerald);
+}
+
+.dv-habit-group-segment.is-amber {
+  background-color: var(--gray);
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--amber) 0px,
+    var(--amber) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+.dv-habit-group-segment.is-gray {
+  background: var(--gray);
+}
+
+.dv-habit-group-empty {
+  color: var(--text-muted);
+}
+
+.dv-habit-group-duplicates {
+  color: #b45309;
+}
+
+.dv-habit-group-duplicates ul {
+  margin: 8px 0 0;
+  padding-left: 16px;
+}
+
+.dv-habit-group-duplicates li {
+  margin: 4px 0;
+}
+
+.dv-habit-group-link {
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
 }

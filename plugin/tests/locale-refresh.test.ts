@@ -23,15 +23,26 @@ describe("locale refresh", () => {
     expect(getLocale()).toBe("ru");
   });
 
-  it("resolves auto locale from app and navigator", async () => {
+  it("applies explicit uk locale", async () => {
+    // given
+    const plugin = await bootstrapPlugin();
+
+    // when
+    plugin.settings.locale = "ua";
+    plugin.refreshLocale();
+
+    // then
+    expect(getLocale()).toBe("ua");
+  });
+
+  it("resolves auto locale from navigator", async () => {
     // given
     const plugin = await bootstrapPlugin();
     plugin.settings.locale = "auto";
-    (plugin.app as any).locale = "ru-RU";
     const originalNavigator = globalThis.navigator;
     Object.defineProperty(globalThis, "navigator", {
       configurable: true,
-      value: { language: "en-US" },
+      value: { language: "ru-RU" },
     });
 
     // when

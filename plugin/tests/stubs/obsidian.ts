@@ -1,4 +1,5 @@
 import { parse as parseYamlLib } from "yaml";
+import moment from "moment";
 
 export type MarkdownPostProcessor = (
   source: string,
@@ -6,18 +7,31 @@ export type MarkdownPostProcessor = (
   ctx: MarkdownPostProcessorContext,
 ) => void | Promise<any>;
 
-export interface MarkdownPostProcessorContext {}
+export class MarkdownRenderChild {
+  containerEl: HTMLElement;
+
+  constructor(containerEl: HTMLElement) {
+    this.containerEl = containerEl;
+  }
+
+  onload(): void {}
+
+  onunload(): void {}
+}
+
+export interface MarkdownPostProcessorContext {
+  sourcePath?: string;
+  addChild?(child: MarkdownRenderChild): void;
+}
 
 export class App {
   vault: any;
   workspace: any;
-  locale?: string;
   constructor() {
     this.vault = {
       getConfig: (_key: string) => undefined,
     };
     this.workspace = {};
-    this.locale = "en";
   }
 }
 
@@ -143,13 +157,15 @@ export class DropdownComponent {
 
   addOptions(options: Record<string, string>): this {
     this.options = { ...this.options, ...options };
-    this.selectEl.innerHTML = "";
-    for (const [value, label] of Object.entries(this.options)) {
+    while (this.selectEl.firstChild) {
+      this.selectEl.removeChild(this.selectEl.firstChild);
+    }
+    Object.entries(this.options).forEach(([value, label]) => {
       const option = document.createElement("option");
       option.value = value;
       option.textContent = label;
       this.selectEl.appendChild(option);
-    }
+    });
     return this;
   }
 
@@ -191,6 +207,9 @@ export class Plugin {
     return processor;
   }
   register(_onunload: () => void): void {}
+  registerEvent(eventRef: () => void): void {
+    this.register(eventRef);
+  }
   async loadData(): Promise<any> {
     return null;
   }
@@ -243,6 +262,42 @@ export class Setting {
     cb(slider);
     return this;
   }
+
+  addToggle(cb: (toggle: ToggleComponent) => void): this {
+    const toggle = new ToggleComponent(this.containerEl);
+    cb(toggle);
+    return this;
+  }
+}
+
+export class ToggleComponent {
+  toggleEl: HTMLInputElement;
+  private value = false;
+  private onChangeHandlers: ChangeHandler<boolean>[] = [];
+
+  constructor(container?: HTMLElement) {
+    this.toggleEl = document.createElement("input");
+    this.toggleEl.type = "checkbox";
+    if (container) container.appendChild(this.toggleEl);
+    this.toggleEl.addEventListener("change", async () => {
+      const checked = this.toggleEl.checked;
+      this.value = checked;
+      for (const handler of this.onChangeHandlers) {
+        await handler(checked);
+      }
+    });
+  }
+
+  setValue(value: boolean): this {
+    this.value = value;
+    this.toggleEl.checked = value;
+    return this;
+  }
+
+  onChange(handler: ChangeHandler<boolean>): this {
+    this.onChangeHandlers.push(handler);
+    return this;
+  }
 }
 
 export function setIcon(_el: HTMLElement, _icon: string): void {}
@@ -272,3 +327,5 @@ export interface Editor {
 export function parseYaml(value: string): any {
   return parseYamlLib(value) ?? {};
 }
+
+export { moment };
